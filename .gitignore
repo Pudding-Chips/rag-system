@@ -1,0 +1,15 @@
+# 数据库文件（不要上传本地的 sqlite 数据库）
+*.sqlite3
+chroma/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 虚拟环境
+venv/
+.venv/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
