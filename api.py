@@ -1,6 +1,3 @@
-# =========================
-# api.py
-# =========================
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import traceback
@@ -36,25 +33,19 @@ class RAGHandler(BaseHTTPRequestHandler):
 
             print(f"\n[检索请求] 问题: {query}")
 
-            # 1. 召回
             raw_docs = retrieve(query, model=model, biz=biz)
             
-            # 2. 精排
             docs = rerank(query, raw_docs)
 
-            # 3. 优化后的展示逻辑
             result_lines = []
             formatted_sources = []
             
-            # 建议阈值设为 0.3。
-            # 1.0 代表完全一致，0.3-0.5 代表语义高度相关
             threshold = 0.3 
 
             for i, d in enumerate(docs):
                 score = d.metadata.get("relevance_score", 0.0)
                 print(f"DEBUG: 排名 {i+1} 分数: {score:.4f}")
 
-                # 只有超过阈值的结果才会被放入最终回答
                 if score >= threshold:
                     answer = d.metadata.get("answer", "无预设回答")
                     result_lines.append(
@@ -63,14 +54,12 @@ class RAGHandler(BaseHTTPRequestHandler):
                         f"**标准回答:** {answer}"
                     )
 
-                # sources 始终保留前几个结果的得分，方便调试查看
                 formatted_sources.append({
                     "matched_question": d.page_content,
                     "content": d.metadata.get("answer", ""),
                     "score": round(score, 4)
                 })
 
-            # 4. 返回结果判断
             if not result_lines:
                 final_answer = "❌ 匹配度低于阈值 (当前阈值: {})，未找到合适内容。".format(threshold)
             else:
