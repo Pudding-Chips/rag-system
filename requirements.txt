@@ -1,4 +1,0 @@
-chromadb==1.5.8
-Requests==2.33.1
-sentence_transformers==5.4.1
-
