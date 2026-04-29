@@ -59,16 +59,22 @@ class RAGHandler(BaseHTTPRequestHandler):
                     "score": round(score, 4)
                 })
 
+                        # 修改 api.py 中的逻辑
             if not result_lines:
-                final_answer = "❌ 匹配度低于阈值 (当前阈值: {})，未找到合适内容。".format(threshold)
+                # 告诉 AI：库里没找到，你可以用你自带的知识（比如搜到的通用获取IP方法）来回答
+                self._send({
+                    "query": query,
+                    "answer": "", 
+                    "status": "not_found",
+                    "msg": "知识库中无相关规范，请基于通用知识回答。"
+                })
             else:
-                final_answer = "\n\n---\n\n".join(result_lines)
-
-            self._send({
-                "query": query,
-                "answer": final_answer,
-                "sources": formatted_sources
-            })
+                # 告诉 AI：找到了，请务必参考这个回答
+                self._send({
+                    "query": query,
+                    "answer": final_answer,
+                    "status": "success"
+                })
 
         except Exception as e:
             traceback.print_exc()
