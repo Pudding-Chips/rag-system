@@ -31,5 +31,4 @@ def rerank(query, docs, top_k=None):
 
     if top_k is not None:
         return ranked_results[:top_k]
-    
-    return ranked_results[:top_k]
+    return ranked_results

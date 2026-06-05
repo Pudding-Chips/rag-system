@@ -48,7 +48,7 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
         print("error: JSON file broke")
         return {"status": "error", "message": "Invalid JSON format"}
 
-    all_ids, all_docs, all_metas, all_embs = [], [], [], []
+    all_ids, all_docs, all_metas, all_embs, all_raw_contents = [], [], [], []
     
     for i, sublist in enumerate(raw_data):
         item = sublist[0] if isinstance(sublist, list) else sublist
@@ -61,20 +61,9 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
         search_content = f"Question: {q_text} Answer: {a_text}"
         doc_id = get_content_hash(q_text, a_text, workspace_id)
 
-        try:
-            emb_result = embed_texts(search_content, DEFAULT_MODEL)
-            vector = emb_result.tolist() if hasattr(emb_result, "tolist") else list(emb_result)
-            if isinstance(vector[0], list): vector = vector[0]
-                
-            if len(vector) != 768:
-                print(f"Skip [{i}]: dimensions {len(vector)} does not match expectations 768")
-                continue
-        except Exception as e:
-            print(f"error: Fail to embed: {e}")
-            continue
-
         all_ids.append(doc_id)
         all_docs.append(search_content)
+        all_raw_contents.append(search_content)
         all_metas.append({
             "workspace_id": workspace_id,
             "biz": biz,
@@ -85,10 +74,27 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
             "update_v": "v2_metadata_isolation",
             "updated_at": datetime.now().isoformat()
         })
-        all_embs.append(vector)
-        
+
     total_added = len(all_ids)
     if total_added > 0:
+        try:
+            print(f"Generating vectors for {total_added} texts.")
+            emb_result = embed_texts(all_raw_contents, DEFAULT_MODEL)
+
+            if hasattr(emb_result, "tolist"):
+                all_embs = emb_result.tolist()
+            else:
+                import numpy as np
+                all_embs = np.array(emb_result).tolist()
+
+            if len(all_embs) > 0 and len(all_embs[0]) != 768:
+                print(f"error: The model output has {len(all_embs[0])}, which does not match the expected 768 dimensions!")
+                return {"status": "error", "message": "Embedding dimension mismatch"}
+            
+        except Exception as e:
+            print(f"error: Fail to embed batches: {e}")
+            return {"status": "error", "message": "Embedding failed"}
+        
         print(f"Start writing in batches, total: {total_added}...")
             
         for step in range(0, total_added, batch_size):

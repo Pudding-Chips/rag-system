@@ -11,7 +11,8 @@ from retriever import retrieve
 from reranker import rerank
 from fill import fill_database
 from db import get_collection
-from config import DEFAULT_MODEL, COLLECTION_TEMPLATE, DEFAULT_BIZ
+from config import DEFAULT_MODEL, COLLECTION_TEMPLATE, DEFAULT_BIZ, RERANK_THRESHOLD
+
 
 class RAGHandler(BaseHTTPRequestHandler):
 
@@ -48,25 +49,31 @@ class RAGHandler(BaseHTTPRequestHandler):
             if not token:
                 return False
             
-            if not workspace_id or not str(workspace_id).strip():
-                expected = ADMIN_TOKEN.get("default")
-            else:
-                wid = str(workspace_id).strip()
-                expected = ADMIN_TOKEN.get(wid, ADMIN_TOKEN.get("default"))
+            TENANT_TOKENS ={
+                "openclaw_group_A": os.getenv("TOKEN_GROUP_A", "GROUP_A_SECRET_2026"),
+                "openclaw_group_B": os.getenv("TOKEN_GROUP_B", "GROUP_B_SECRET_2026"),
+            }
+            GLOBAL_ADMIN_TOKEN = os.getenv("RAG_ADMIN_TOKEN", "SYSTEM_SUPER_ADMIN_TOKEN")
+            
+            wid = str(workspace_id).strip()
 
-            return token == expected
-        
-        coll = getattr(self.server, 'collection', None)
+            if token == GLOBAL_ADMIN_TOKEN:
+                return True
+            
+            expected_token = TENANT_TOKENS.get(wid)
+            if expected_token and token == expected_token:
+                return True
+            return False
 
         if self.path == "/rag/delete":
             try:             
                 data = self._read_json()
-
-                if data is None:
+                if not data:
                     self._send({"error": "Invalid JSON"}, 400)
                     return
                 
                 workspace_id = data.get("workspace_id")
+                biz = data.get("biz", DEFAULT_BIZ)
 
                 if not workspace_id or not str(workspace_id).strip():
                     self._send({"error": "workspace_id cannot be empty"}, 400)
@@ -76,12 +83,14 @@ class RAGHandler(BaseHTTPRequestHandler):
                     self._send({"error": "Unauthorized"}, 401)
                     return
 
-                if coll:
+                target_coll = get_collection(biz)
+
+                if target_coll:
                     wid = str(workspace_id).strip()
-                    coll.delete(where={"workspace_id": {"$eq": wid}})
-                    self._send({"message": f"Successfully cleared workspace: {wid}"})
+                    target_coll.delete(where={"workspace_id": {"$eq": wid}})
+                    self._send({"message": f"Successfully cleared workspace: {wid} in biz: {biz}"})
                 else:
-                    self._send({"error": "Database not connected or invalid ID"}, 500)
+                    self._send({"error": "Database connection failed"}, 500)
                     return
                 
             except Exception as e:
@@ -102,13 +111,19 @@ class RAGHandler(BaseHTTPRequestHandler):
                     self._send({"error": "workspace_id cannot be empty"}, 400)
                     return
                 
-                biz = data.get("biz", DEFAULT_BIZ)
-                json_file = data.get("json_file", "data/data.json")
+                request_file = data.get("json.file", "data/data.json")
+                file_name = os.path.basename(request_file)
+                if not file_name.endswith('.json'):
+                    self._send({"error": "Only JSON files are allowed"}, 400)
+                    return
+                
+                json_file = os.path.join("data", file_name)
 
                 if not check_auth(data, workspace_id):
                     self._send({"error": "Unauthorized"}, 401)
                     return
-
+                
+                biz = data.get("biz", DEFAULT_BIZ)
                 result = fill_database(
                     workspace_id=str(workspace_id).strip(), 
                     biz=biz, 
@@ -116,7 +131,6 @@ class RAGHandler(BaseHTTPRequestHandler):
                     agent_id=data.get("agent_id", "unknown"), 
                     group_id=data.get("group_id", "")
                 )
-                
                 self._send({"message": "Update successful", "detail": result})
 
             except Exception as e:
@@ -127,26 +141,25 @@ class RAGHandler(BaseHTTPRequestHandler):
         if self.path == "/rag/query":
             try:
                 data = self._read_json()
-
                 if not data:
                     self._send({"error": "Invalid JSON"}, 400)
                     return
                 
                 query = data.get("query")
                 inbound_context = data.get("inbound_context", {})
-                workspace_id = None
+                workspace_id = data.get("workspace_id")
+
                 if isinstance(inbound_context, dict):
                     workspace_id = (
                         inbound_context.get("workspace_id") or
                         inbound_context.get("tenant_id") or
-                        inbound_context.get("session_id")
+                        inbound_context.get("session_id") or
+                        workspace_id
                     )
-                    if not workspace_id:
-                        workspace_id = data.get("workspace_id")
 
-                    if not query or not workspace_id:
-                        self._send({"error": "query or dynamic workspace_id cannot be empty"}, 400)
-                        return
+                if not query or not workspace_id:
+                    self._send({"error": "query or dynamic workspace_id cannot be empty"}, 400)
+                    return
 
                 model = data.get("model", DEFAULT_MODEL)
                 biz = data.get("biz", DEFAULT_BIZ)
@@ -162,7 +175,7 @@ class RAGHandler(BaseHTTPRequestHandler):
                 result_lines = []
                 formatted_sources = []
                 
-                threshold = 0.55
+                threshold = RERANK_THRESHOLD
                 has_knowledge = False
 
                 for i, d in enumerate(docs):
