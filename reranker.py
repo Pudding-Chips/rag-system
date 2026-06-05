@@ -21,9 +21,8 @@ def rerank(query, docs, top_k=None):
         raw_scores = [raw_scores]
 
     ranked_results = []
-    for d, raw_scores in zip(docs, raw_scores):
-        normalized_score = float(sigmoid(raw_scores))
-
+    for d, scores in zip(docs, raw_scores):
+        normalized_score = float(sigmoid(scores))
         d.metadata["relevance_score"] = normalized_score
         ranked_results.append(d)
 

@@ -37,11 +37,6 @@ class RAGHandler(BaseHTTPRequestHandler):
             return None
 
     def do_POST(self):
-        ADMIN_TOKEN = {
-            "default": os.getenv("RAG_ADMIN_TOKEN", "DEFAULT_STRONG_TOKEN"),
-
-        }
-
         def check_auth(data: dict, workspace_id) -> bool:
             if not data or "token" not in data:
                 return False
@@ -111,7 +106,7 @@ class RAGHandler(BaseHTTPRequestHandler):
                     self._send({"error": "workspace_id cannot be empty"}, 400)
                     return
                 
-                request_file = data.get("json.file", "data/data.json")
+                request_file = data.get("json_file", "data/data.json")
                 file_name = os.path.basename(request_file)
                 if not file_name.endswith('.json'):
                     self._send({"error": "Only JSON files are allowed"}, 400)

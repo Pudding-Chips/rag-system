@@ -11,7 +11,6 @@ from embed import embed_texts
 from config import DEFAULT_MODEL, COLLECTION_TEMPLATE, DEFAULT_BIZ
 
 client = chromadb.HttpClient(host='localhost', port=8000)
-target_collection_name = COLLECTION_TEMPLATE.format(biz=DEFAULT_BIZ)
 
 def get_content_hash(q, a, workspace_id):
     """结合问题和答案生成唯一 ID, 确保内容更新时 ID 随之改变"""
@@ -25,14 +24,16 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
         print("error: workspace_id invalid")
         return {"status": "error", "message": "Missing workspace_id"}
     
+    current_collection_name = COLLECTION_TEMPLATE.format(biz=biz)
+
     if force_reset:
         try:
-            client.delete_collection(name=target_collection_name)
-            print(f"Old collection cleared: {target_collection_name}")
+            client.delete_collection(name=current_collection_name)
+            print(f"Old collection cleared: {current_collection_name}")
         except Exception as e:
             print(f"error: {e}")
     
-    collection = client.get_or_create_collection(name=target_collection_name)
+    collection = client.get_or_create_collection(name=current_collection_name)
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     json_path = os.path.join(base_dir, json_file)
