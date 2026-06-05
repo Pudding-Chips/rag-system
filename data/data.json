@@ -8,6 +8,8 @@
     [{"question 7": "CDN加速的访问端口支持自定义端口吗？", "answer": "目前 CDN 加速的访问端口仅支持开放80、443、8080三个端口，默认全部开启，用户可自行选择是否关闭。"}],
     [{"question 8": "CDN 是否支持 GZIP 压缩?", "answer": "CDN 为了节省您的流量，默认将大小在256Byte - 2048KB区间，后缀为 .js;.html;.css;.xml;.json;.shtml;.htm; 的文件进行 Gzip 格式压缩。"}],
     [{"question 9": "CDN 中间源是什么?", "answer": "CDN 中间源即中间源服务器，是位于业务服务器与 CDN 节点之间的一个中间层回源服务器。中间源对节点的回源请求进行了收敛，降低您源站的回源压力。"}],
-    [{"question 10": "如何获取客户端真实 IP 和 客户端真实请求协议?", "answer": "请求通过边缘加速节点后，腾讯云 CDN 默认支持携带 X-Forwarded-For（真实客户端 IP）和 X-Forwarded-Proto（真实客户端请求协议）头部回源，您无需再配置。"}]
+    [{"question 10": "如何获取客户端真实 IP 和 客户端真实请求协议?", "answer": "请求通过边缘加速节点后，腾讯云 CDN 默认支持携带 X-Forwarded-For（真实客户端 IP）和 X-Forwarded-Proto（真实客户端请求协议）头部回源，您无需再配置。"}],
+    [{"question 11": "CDN叫什么名?", "answer": "PSC"}]
+
 ]
 
