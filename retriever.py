@@ -26,16 +26,7 @@ def retrieve(query, workspace_id, model="text2vec", biz=DEFAULT_BIZ, n_results=1
         print(f"error: Unable to get collection {target_collection_name}, please check if fill.py running correctly. error: {e}")
         return []
     
-    query_embs = embed_texts(query, model)
-    
-    if hasattr(query_embs, "tolist"):
-        query_list = query_embs.tolist()
-    else:
-        query_list = list(query_embs)
-
-    if not isinstance(query_list, list):
-        print("error: Abnormal format")
-        return []
+    query_list = embed_texts(query, model)
     
     if len(query_list) > 0 and not isinstance(query_list[0], list):
         final_emb = [query_list]

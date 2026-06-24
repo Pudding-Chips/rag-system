@@ -49,7 +49,7 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
         print("error: JSON file broke")
         return {"status": "error", "message": "Invalid JSON format"}
 
-    all_ids, all_docs, all_metas, all_embs, all_raw_contents = [], [], [], []
+    all_ids, all_docs, all_metas, all_embs, all_raw_contents = [], [], [], [], []
     
     for i, sublist in enumerate(raw_data):
         item = sublist[0] if isinstance(sublist, list) else sublist
@@ -81,12 +81,6 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
         try:
             print(f"Generating vectors for {total_added} texts.")
             emb_result = embed_texts(all_raw_contents, DEFAULT_MODEL)
-
-            if hasattr(emb_result, "tolist"):
-                all_embs = emb_result.tolist()
-            else:
-                import numpy as np
-                all_embs = np.array(emb_result).tolist()
 
             if len(all_embs) > 0 and len(all_embs[0]) != 768:
                 print(f"error: The model output has {len(all_embs[0])}, which does not match the expected 768 dimensions!")

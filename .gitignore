@@ -15,7 +15,6 @@ venv/
 Thumbs.db
 
 *.py.bak
-clear_biz.py
-llm.py
-test_retriever.py
-ui.py
+crawl-test.py
+crawl.py
+website_data.json

@@ -4,8 +4,9 @@
 
 ## 快速开始
 1. **安装依赖**: `pip install -r requirements.txt`
-2. **初始化数据库**: `python fill.py`
-3. **启动 API**: `python api.py`
+2. **运行chromadb**: `chroma run --host localhost --port 8000`
+3. **初始化数据库**: `python fill.py`
+4. **启动 API**: `python api.py`
 
 ## 功能特性
 - **Embedding**: text2vec-base-chinese

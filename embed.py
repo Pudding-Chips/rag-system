@@ -18,17 +18,26 @@ def get_embedding_model(model_name: str) -> SentenceTransformer:
                     if model_name not in EMBEDDING_MODELS:
                         raise ValueError(f"Model Configuration not found: {model_name}")
                     print(f"Loading text vectorization model: {model_name} | {EMBEDDING_MODELS[model_name]}")
-                    _model_cache[model_name] = SentenceTransformer(EMBEDDING_MODELS[model_name])
+                    model = SentenceTransformer(EMBEDDING_MODELS[model_name])
+                    _model_cache[model_name] = model   
     return _model_cache[model_name]
+
+def preload_default_model(model_name: str):
+    """供服务启动时同步加载，避免运行时并发锁阻塞"""
+    try:
+        get_embedding_model(model_name)
+        print(f"Preload Model【{model_name}】succeed！")
+    except Exception as e:
+        print(f"Preload Model【{model_name}】fail: {e}")
 
 def embed_texts(texts, model_name: str):
     model = get_embedding_model(model_name)
     embeddings = model.encode(texts)
     if hasattr(embeddings, "tolist"):
-        result = embeddings.tolist()
+        return embeddings.tolist()
     elif isinstance(embeddings, np.ndarray):
-        result = embeddings.tolist()
+        return embeddings.tolist()
     else:
-        result = list(embeddings)
+        return [float(x) for x in embeddings] if not isinstance(embeddings, list) else embeddings
 
     return result

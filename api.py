@@ -12,6 +12,7 @@ from reranker import rerank
 from fill import fill_database
 from db import get_collection
 from config import DEFAULT_MODEL, COLLECTION_TEMPLATE, DEFAULT_BIZ, RERANK_THRESHOLD
+from embed import preload_default_model
 
 
 class RAGHandler(BaseHTTPRequestHandler):
@@ -144,12 +145,11 @@ class RAGHandler(BaseHTTPRequestHandler):
                 inbound_context = data.get("inbound_context", {})
                 workspace_id = data.get("workspace_id")
 
-                if isinstance(inbound_context, dict):
+                if not workspace_id and isinstance(inbound_context, dict):
                     workspace_id = (
                         inbound_context.get("workspace_id") or
                         inbound_context.get("tenant_id") or
-                        inbound_context.get("session_id") or
-                        workspace_id
+                        inbound_context.get("session_id")
                     )
 
                 if not query or not workspace_id:
@@ -209,6 +209,7 @@ class RAGHandler(BaseHTTPRequestHandler):
         self._send({"error": "Not found"}, 404)
 
 def run():
+    preload_default_model(DEFAULT_MODEL)
     target_collection_name = COLLECTION_TEMPLATE.format(biz=DEFAULT_BIZ)
     client = chromadb.HttpClient(host='localhost', port=8000)
     collection = client.get_or_create_collection(name=target_collection_name)
