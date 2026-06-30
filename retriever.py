@@ -15,19 +15,46 @@ def retrieve(query, workspace_id, model="text2vec", biz=DEFAULT_BIZ, n_results=1
     if not workspace_id:
         print("error: workspace_id is empty")
         return []
+
     
+
     client = get_client()
+
     
+
     target_collection_name = COLLECTION_TEMPLATE.format(biz=biz)
+
     
+
     try:
         collection = client.get_collection(name=target_collection_name)
     except Exception as e:
         print(f"error: Unable to get collection {target_collection_name}, please check if fill.py running correctly. error: {e}")
         return []
     
-    query_list = embed_texts(query, model)
+
+    query_embs = embed_texts(query, model)
+
     
+
+    if hasattr(query_embs, "tolist"):
+
+        query_list = query_embs.tolist()
+
+    else:
+
+        query_list = list(query_embs)
+
+
+
+    if not isinstance(query_list, list):
+
+        print("error: Abnormal format")
+
+        return []
+
+    
+
     if len(query_list) > 0 and not isinstance(query_list[0], list):
         final_emb = [query_list]
     else:
@@ -49,7 +76,7 @@ def retrieve(query, workspace_id, model="text2vec", biz=DEFAULT_BIZ, n_results=1
     except Exception as e:
         print(f"Error: Chromadb fail to retrieve: {e}")
         return []
-    
+
     docs = results.get("documents", [[]])[0] if results.get("documents") else []
     metas = results.get("metadatas", [[]])[0] if results.get("metadatas") else []
     dists = results.get("distances", [[]])[0] if results.get("distances") else []
@@ -75,7 +102,7 @@ if __name__ == "__main__":
         workspace_id="my_prod_workspace_01", 
         n_results=3
     )
-    
+
     print(f"\Found {len(test_docs)} result")
     for doc in test_docs:
         print(f"Content: {doc.page_content}")

@@ -12,7 +12,6 @@ from reranker import rerank
 from fill import fill_database
 from db import get_collection
 from config import DEFAULT_MODEL, COLLECTION_TEMPLATE, DEFAULT_BIZ, RERANK_THRESHOLD
-from embed import preload_default_model
 
 
 class RAGHandler(BaseHTTPRequestHandler):
@@ -44,18 +43,18 @@ class RAGHandler(BaseHTTPRequestHandler):
             token = data.get("token")
             if not token:
                 return False
-            
+
             TENANT_TOKENS ={
                 "openclaw_group_A": os.getenv("TOKEN_GROUP_A", "GROUP_A_SECRET_2026"),
                 "openclaw_group_B": os.getenv("TOKEN_GROUP_B", "GROUP_B_SECRET_2026"),
             }
             GLOBAL_ADMIN_TOKEN = os.getenv("RAG_ADMIN_TOKEN", "SYSTEM_SUPER_ADMIN_TOKEN")
-            
+
             wid = str(workspace_id).strip()
 
             if token == GLOBAL_ADMIN_TOKEN:
                 return True
-            
+
             expected_token = TENANT_TOKENS.get(wid)
             if expected_token and token == expected_token:
                 return True
@@ -67,7 +66,7 @@ class RAGHandler(BaseHTTPRequestHandler):
                 if not data:
                     self._send({"error": "Invalid JSON"}, 400)
                     return
-                
+
                 workspace_id = data.get("workspace_id")
                 biz = data.get("biz", DEFAULT_BIZ)
 
@@ -88,7 +87,7 @@ class RAGHandler(BaseHTTPRequestHandler):
                 else:
                     self._send({"error": "Database connection failed"}, 500)
                     return
-                
+
             except Exception as e:
                 traceback.print_exc()
                 self._send({"error": str(e)}, 500)
@@ -106,19 +105,19 @@ class RAGHandler(BaseHTTPRequestHandler):
                 if not workspace_id or not str(workspace_id).strip():
                     self._send({"error": "workspace_id cannot be empty"}, 400)
                     return
-                
+
                 request_file = data.get("json_file", "data/data.json")
                 file_name = os.path.basename(request_file)
                 if not file_name.endswith('.json'):
                     self._send({"error": "Only JSON files are allowed"}, 400)
                     return
-                
+
                 json_file = os.path.join("data", file_name)
 
                 if not check_auth(data, workspace_id):
                     self._send({"error": "Unauthorized"}, 401)
                     return
-                
+
                 biz = data.get("biz", DEFAULT_BIZ)
                 result = fill_database(
                     workspace_id=str(workspace_id).strip(), 
@@ -133,23 +132,24 @@ class RAGHandler(BaseHTTPRequestHandler):
                 traceback.print_exc()
                 self._send({"error": str(e)}, 500)
             return
-        
+
         if self.path == "/rag/query":
             try:
                 data = self._read_json()
                 if not data:
                     self._send({"error": "Invalid JSON"}, 400)
                     return
-                
+
                 query = data.get("query")
                 inbound_context = data.get("inbound_context", {})
                 workspace_id = data.get("workspace_id")
 
-                if not workspace_id and isinstance(inbound_context, dict):
+                if isinstance(inbound_context, dict):
                     workspace_id = (
                         inbound_context.get("workspace_id") or
                         inbound_context.get("tenant_id") or
-                        inbound_context.get("session_id")
+                        inbound_context.get("session_id") or
+                        workspace_id
                     )
 
                 if not query or not workspace_id:
@@ -169,7 +169,7 @@ class RAGHandler(BaseHTTPRequestHandler):
 
                 result_lines = []
                 formatted_sources = []
-                
+
                 threshold = RERANK_THRESHOLD
                 has_knowledge = False
 
@@ -205,16 +205,15 @@ class RAGHandler(BaseHTTPRequestHandler):
                 traceback.print_exc()
                 self._send({"error": str(e)}, 500)
             return
-        
+
         self._send({"error": "Not found"}, 404)
 
 def run():
-    preload_default_model(DEFAULT_MODEL)
     target_collection_name = COLLECTION_TEMPLATE.format(biz=DEFAULT_BIZ)
     client = chromadb.HttpClient(host='localhost', port=8000)
     collection = client.get_or_create_collection(name=target_collection_name)
 
-    server = HTTPServer(("", 8001), RAGHandler)
+    server = HTTPServer(("0.0.0.0", 8001), RAGHandler)
     server.collection = collection
 
     print("API Server is running on port 8001: http://localhost:8001")
