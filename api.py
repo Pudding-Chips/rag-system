@@ -128,7 +128,7 @@ class RAGHandler(BaseHTTPRequestHandler):
 
                 if not check_auth(data, cid):
                     self._send({"error": "Unauthorized"}, 401)
-                return
+                    return
 
                 biz = data.get("biz", DEFAULT_BIZ)
                 result = fill_database(

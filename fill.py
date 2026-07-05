@@ -53,28 +53,47 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
 
     for i, sublist in enumerate(raw_data):
         item = sublist[0] if isinstance(sublist, list) else sublist
-        if not isinstance(item, dict): continue
+        if not isinstance(item, dict): 
+            continue
 
-        q_text = next((v for k, v in item.items() if "question" in k.lower()), "").strip()
-        a_text = item.get("answer", "").strip()
-        if not q_text: continue
+        # 1. 获取 questions 列表
+        questions = item.get("question", [])
+        if isinstance(questions, str):
+            questions = [questions]
+            
+        # 2. 获取并转换标准答案为字符串
+        raw_answer = item.get("answer", "")
+        if isinstance(raw_answer, dict):
+            a_text = json.dumps(raw_answer, ensure_ascii=False, indent=2)
+        else:
+            a_text = str(raw_answer).strip()
 
-        search_content = f"Question: {q_text} Answer: {a_text}"
-        doc_id = get_content_hash(q_text, a_text, workspace_id)
+        # 3. 【重点检查这里】这一行必须比上面的 for 语句多缩进 4 个空格（处于循环内部）
+        if not questions or not a_text: 
+            continue
 
-        all_ids.append(doc_id)
-        all_docs.append(search_content)
-        all_raw_contents.append(search_content)
-        all_metas.append({
-            "workspace_id": workspace_id,
-            "biz": biz,
-            "agent_id": agent_id,
-            "group_id": str(group_id),
-            "answer": a_text, 
-            "question": q_text, 
-            "update_v": "v2_metadata_isolation",
-            "updated_at": datetime.now().isoformat()
-        })
+        # 4. 遍历同义句逻辑（同样需要正确缩进）
+        for q_text in questions:
+            q_text = q_text.strip()
+            if not q_text: 
+                continue
+            
+            search_content = f"Question: {q_text} Answer: {a_text}"
+            doc_id = get_content_hash(q_text, a_text, workspace_id)
+
+            all_ids.append(doc_id)
+            all_docs.append(search_content)
+            all_raw_contents.append(search_content)
+            all_metas.append({
+                "workspace_id": workspace_id,
+                "biz": biz,
+                "agent_id": agent_id,
+                "group_id": str(group_id),
+                "answer": a_text, 
+                "question": q_text, 
+                "update_v": "v2_metadata_isolation",
+                "updated_at": datetime.now().isoformat()
+            })
 
     total_added = len(all_ids)
     if total_added > 0:
