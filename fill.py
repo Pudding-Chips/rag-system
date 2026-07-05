@@ -12,17 +12,17 @@ from config import DEFAULT_MODEL, COLLECTION_TEMPLATE, DEFAULT_BIZ
 
 client = chromadb.HttpClient(host='localhost', port=8000)
 
-def get_content_hash(q, a, workspace_id):
+def get_content_hash(q, a, chat_id):
     """结合问题和答案生成唯一 ID, 确保内容更新时 ID 随之改变"""
-    combined = f"WS:{workspace_id}|Q:{q}|A:{a}"
+    combined = f"WS:{chat_id}|Q:{q}|A:{a}"
     return hashlib.md5(combined.encode('utf-8')).hexdigest()
 
-def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", force_reset=False, agent_id="unknown", group_id=""):
+def fill_database(chat_id, biz=DEFAULT_BIZ, json_file="data/data.json", force_reset=False, agent_id="unknown", group_id=""):
     batch_size = 100
 
-    if not workspace_id:
-        print("error: workspace_id invalid")
-        return {"status": "error", "message": "Missing workspace_id"} 
+    if not chat_id:
+        print("error: chat_id invalid")
+        return {"status": "error", "message": "Missing chat_id"} 
 
     current_collection_name = COLLECTION_TEMPLATE.format(biz=biz)
 
@@ -56,10 +56,7 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
         if not isinstance(item, dict): 
             continue
 
-        # 1. 获取 questions 列表
-        questions = item.get("question", [])
-        if isinstance(questions, str):
-            questions = [questions]
+        raw_question = next((v for k, v in item.items() if "question" in k.lower()), None)
             
         # 2. 获取并转换标准答案为字符串
         raw_answer = item.get("answer", "")
@@ -69,23 +66,27 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
             a_text = str(raw_answer).strip()
 
         # 3. 【重点检查这里】这一行必须比上面的 for 语句多缩进 4 个空格（处于循环内部）
-        if not questions or not a_text: 
+        if not raw_question or not a_text: 
             continue
+
+        questions = raw_question if isinstance(raw_question, list) else[raw_question]
 
         # 4. 遍历同义句逻辑（同样需要正确缩进）
         for q_text in questions:
-            q_text = q_text.strip()
+            q_text = str(q_text).strip()
             if not q_text: 
                 continue
+
+            search_content = q_text
             
-            search_content = f"Question: {q_text} Answer: {a_text}"
-            doc_id = get_content_hash(q_text, a_text, workspace_id)
+            combined_str = f"Question: {q_text} Answer: {a_text}"
+            doc_id = get_content_hash(q_text, a_text, chat_id)
 
             all_ids.append(doc_id)
             all_docs.append(search_content)
             all_raw_contents.append(search_content)
             all_metas.append({
-                "workspace_id": workspace_id,
+                "chat_id": chat_id,
                 "biz": biz,
                 "agent_id": agent_id,
                 "group_id": str(group_id),
@@ -139,7 +140,7 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
 
 if __name__ == "__main__":
     result = fill_database(
-        workspace_id="-1001234567890", 
+        chat_id="-1001234567890", 
         force_reset=True
     )
     print(f"End with: {result}")

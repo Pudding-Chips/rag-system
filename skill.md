@@ -21,7 +21,7 @@ description: >
    - **Method**: `POST`
    - **Payload Mapping (Strict)**:
      - `query`: `{{user_input_query}}` (用户问题的核心关键词或语义查询词)
-     - `workspace_id`: `{{context.chat_id}}` (🌟 显式指示 OpenClaw 运行时自动从小程序/群聊上下文的 chat_id 或 inbound_meta 中动态提取并注入)
+     - `chat_id`: `{{context.chat_id}}` (🌟 显式指示 OpenClaw 运行时自动从小程序/群聊上下文的 chat_id 或 inbound_meta 中动态提取并注入)
      - `biz`: `general`
 
 2. **状态判定**：
@@ -38,11 +38,11 @@ description: >
 > 💡 提示 OpenClaw 框架此 Skill 的输入参数架构：
 
 - `query` (string, required): 用户的技术疑问或关键词。
-- `workspace_id` (string, required): 动态群组隔离 ID。由 OpenClaw 系统变量 `{{chat.id}}` 或 `{{inbound_meta.id}}` 自动填充，禁止大模型自主胡乱生成。
+- `chat_id` (string, required): 动态群组隔离 ID。由 OpenClaw 系统变量 `{{chat.id}}` 或 `{{inbound_meta.id}}` 自动填充，禁止大模型自主胡乱生成。
 
 ## Constraints (Strict)
 
-- **多租户隔离**：严禁在不传递 `workspace_id` 的情况下进行查询，防止 A 群信息泄露给 B 群。
+- **多租户隔离**：严禁在不传递 `chat_id` 的情况下进行查询，防止 A 群信息泄露给 B 群。
 - **短输入处理**：如果用户输入非常短，先询问用户具体意图，或根据上下文补全后再进行搜索。
 - **禁止脑补**：即使是简单问题，也必须通过 RAG 校验，防止本地规范与通用知识冲突。
 - **强制参考**：一旦 RAG 命中，禁止夹杂任何未在 `answer` 中出现的自定义信息。

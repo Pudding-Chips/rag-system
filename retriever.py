@@ -11,9 +11,9 @@ class SimpleDocument:
         self.page_content = content
         self.metadata = metadata
 
-def retrieve(query, workspace_id, model="text2vec", biz=DEFAULT_BIZ, n_results=10):
-    if not workspace_id:
-        print("error: workspace_id is empty")
+def retrieve(query, chat_id, model="text2vec", biz=DEFAULT_BIZ, n_results=10):
+    if not chat_id:
+        print("error: chat_id is empty")
         return []
 
     client = get_client()
@@ -42,11 +42,11 @@ def retrieve(query, workspace_id, model="text2vec", biz=DEFAULT_BIZ, n_results=1
     else:
         final_emb = query_list
 
-    target_id = str(workspace_id).strip()
+    target_id = str(chat_id).strip()
     print(f"[RAG QUERY] workspace={target_id} | biz={biz} | query={query[:40]}...")
 
     #filter (对齐fill.py)
-    where_filter = {"workspace_id": {"$eq": target_id}}
+    where_filter = {"chat_id": {"$eq": target_id}}
 
     try:
         results = collection.query(
@@ -81,7 +81,7 @@ def retrieve(query, workspace_id, model="text2vec", biz=DEFAULT_BIZ, n_results=1
 if __name__ == "__main__":
     test_docs = retrieve(
         query="怎么修改密码？", 
-        workspace_id="-1001234567890", 
+        chat_id="-1001234567890", 
         n_results=3
     )
 

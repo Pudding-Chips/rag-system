@@ -1,7 +1,7 @@
 """
 token校验、统一API
 """
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import ThreadingHTTPServer
 import json
 import traceback
 import chromadb
@@ -132,7 +132,7 @@ class RAGHandler(BaseHTTPRequestHandler):
 
                 biz = data.get("biz", DEFAULT_BIZ)
                 result = fill_database(
-                    workspace_id=cid, 
+                    chat_id=cid, 
                     biz=biz, 
                     json_file=json_file, 
                     agent_id=data.get("agent_id", "unknown"), 
@@ -178,7 +178,7 @@ class RAGHandler(BaseHTTPRequestHandler):
 
                 print(f"\n [Telegram ID: {cid}] | question: {query[:50]}")
 
-                raw_docs = retrieve(query=query, workspace_id=cid, model=model, biz=biz)
+                raw_docs = retrieve(query=query, chat_id=cid, model=model, biz=biz)
                 print(f"retrieve: {len(raw_docs)}")
 
                 docs = rerank(query, raw_docs) if raw_docs else []
@@ -210,6 +210,9 @@ class RAGHandler(BaseHTTPRequestHandler):
 
                 context_for_ai = "\n\n---\n\n".join(result_lines) if result_lines else ""
 
+                if not has_knowledge:
+                    context_for_ai = "[Alert: No matching references were found in the local CDN operations and maintenance knowledge base. Please refuse to answer the user's operation request and prompt them to contact customer service.]"
+                    
                 self._send({
                     "query": query,
                     "answer": context_for_ai,
@@ -229,7 +232,7 @@ def run():
     client = chromadb.HttpClient(host='localhost', port=8000)
     collection = client.get_or_create_collection(name=target_collection_name)
 
-    server = HTTPServer(("0.0.0.0", 8001), RAGHandler)
+    server = ThreadingHTTPServer(("0.0.0.0", 8001), RAGHandler)
     server.collection = collection
 
     print("API Server is running on port 8001: http://localhost:8001")
