@@ -20,8 +20,6 @@ def get_content_hash(q, a, workspace_id):
 def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", force_reset=False, agent_id="unknown", group_id=""):
     batch_size = 100
 
-    
-
     if not workspace_id:
         print("error: workspace_id invalid")
         return {"status": "error", "message": "Missing workspace_id"} 
@@ -122,7 +120,7 @@ def fill_database(workspace_id, biz=DEFAULT_BIZ, json_file="data/data.json", for
 
 if __name__ == "__main__":
     result = fill_database(
-        workspace_id="openclaw_group_A", 
+        workspace_id="-1001234567890", 
         force_reset=True
     )
     print(f"End with: {result}")

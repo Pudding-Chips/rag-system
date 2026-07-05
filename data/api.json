@@ -1,0 +1,388 @@
+[
+  {
+    "question": [
+      "怎么用接口查我名下的站点列表？",
+      "老大让我导一份所有站点的清单，调用哪个API？",
+      "CDN后台站点太多了，能写个脚本分页查一下站点列表吗？",
+      "Polestar有根据关键字搜索站点的接口吗？",
+      "怎么通过API把cname、normal和ip类型的站点全部捞出来？"
+    ],
+    "answer": {
+      "url": "/api/site/page",
+      "method": "POST",
+      "description": "分页查询站点列表，支持关键字及站点类型过滤",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "request_body": {
+        "keyWord": "字符串，关键字查询 (选填)",
+        "searchPage": {
+          "page": "数字，默认1 (必填)",
+          "pageSize": "数字，默认10 (必填)",
+          "desc": "数字，是否倒序，1为倒序，0为顺序，默认0 (必填)",
+          "sort": "字符串，排序字段 (选填)"
+        },
+        "type": "字符串，站点类型(cname:MNC站点, normal:普通站点, port:4层转发站点)，可用逗号分隔查询多种 (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "如何根据站点ID获取某个站点的详细配置？",
+      "我想看下某个具体站点的源站和回源协议，调用哪个接口？",
+      "脚本里需要拿到特定siteId的基础信息，怎么查？",
+      "通过API怎么知道一个站点现在是启用还是禁用状态？",
+      "怎么查指定站点的CNAME前缀和后缀是什么？"
+    ],
+    "answer": {
+      "url": "/api/site/find-by-id",
+      "method": "GET",
+      "description": "通过站点ID获取站点的详细配置信息",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "怎么用API批量或者单个新建CDN站点？",
+      "自动化运维脚本想自动开通一个新站点，该怎么传参？",
+      "新来个客户要建普通站点，源站是IP加端口，怎么通过接口创建？",
+      "配置新增站点时，upstreamBalance负载均衡方式有哪些选项？",
+      "创建新站点的时候，回源协议和源站列表该怎么填？"
+    ],
+    "answer": {
+      "url": "/api/site/create",
+      "method": "PUT",
+      "description": "新增CDN站点",
+      "headers": {
+        "polestar-token": "API密钥 (必填)",
+        "content-type": "application/json"
+      },
+      "request_body": {
+        "name": "字符串，站点名称 (选填)",
+        "type": "字符串，站点类型(normal:普通站点, cname:MNC站点, port:端口转发) (必填)",
+        "upstreamList": "数组对象，源点列表，包含host(源站IP/CNAME)和port(源站端口) (必填)",
+        "upstreamBalance": "字符串，负载方式(ip_hash:根据IP, poll:轮询, backup:备用机机制) (必填)",
+        "upstreamPortFlag": "数字，默认0，按端口回源 (选填)",
+        "upstreamProtocol": "字符串，回源协议(http或者https) (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "站点的源站IP变了，怎么用接口去修改站点配置？",
+      "我想用脚本改一下站点的负载均衡方式为轮询，调用哪个接口？",
+      "更新站点描述或者站点名字的API是什么？",
+      "修改站点时，如果开启了端口回源，回源协议会被忽略吗？",
+      "怎么在线更新站点的回源端口和源站请求体列表？"
+    ],
+    "answer": {
+      "url": "/api/site/modify",
+      "method": "PUT",
+      "description": "修改现有站点的基础配置和源站信息",
+      "headers": {
+        "polestar-token": "API密钥 (必填)",
+        "content-type": "application/json"
+      },
+      "request_body": {
+        "id": "数字，站点ID (必填)",
+        "name": "字符串，站点名称 (选填)",
+        "type": "字符串，站点类型(normal:普通站点, cname:MNC站点) (必填)",
+        "upstreamList": "数组，源点请求体列表 (必填)",
+        "upstreamBalance": "字符串，负载方式(ip_hash, poll, backup) (必填)",
+        "upstreamPortFlag": "数字，是否根据端口回源(1:启用, 0:禁用) (选填)",
+        "upstreamProtocol": "字符串，回源协议(http|https) (必填)",
+        "description": "字符串，站点描述 (选填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "怎么把一个没用的站点彻底删掉？",
+      "调用哪个接口可以清理掉作废的站点？",
+      "后台有僵尸站点，能用API直接咔嚓掉（删除）吗？",
+      "删除站点的DELETE请求该怎么传参？",
+      "我不小心建错了一个站点，怎么通过接口把它干掉？"
+    ],
+    "answer": {
+      "url": "/api/site/delete",
+      "method": "DELETE",
+      "description": "删除指定的站点",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "突发紧急情况，怎么一键禁用某个站点？",
+      "怎么把一个站点临时下线（停用）？",
+      "站点遭受攻击想先把它关闭掉，调用哪个API？",
+      "禁用站点的接口是POST还是PUT？传什么参数？",
+      "如何把指定siteId的状态改成禁用状态？"
+    ],
+    "answer": {
+      "url": "/api/site/disable",
+      "method": "PUT",
+      "description": "禁用指定的站点（临时下线）",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "站点维护完了，怎么重新启用它？",
+      "临时下线的网站怎么用接口恢复上线？",
+      "如何一键开启之前被禁用的站点？",
+      "启用站点的API链接长啥样？",
+      "把站点状态从禁用恢复到启用的接口是什么？"
+    ],
+    "answer": {
+      "url": "/api/site/enable",
+      "method": "PUT",
+      "description": "启用指定的站点",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "怎么把一堆站点的域名列表导出成文件？",
+      "能通过接口拿到包含Domain、SSL等信息的站点域名文件吗？",
+      "我想批量导出特定站点ID的域名清单，接口要传数组吗？",
+      "导出站点域名列表文件的API怎么调用？",
+      "怎么用curl拉取所选站点的域名CSV/明细表格数据？"
+    ],
+    "answer": {
+      "url": "/api/domain/export-list",
+      "method": "POST",
+      "description": "导出所选站点域名列表文件，返回CSV格式字符串",
+      "headers": {
+        "polestar-token": "API密钥 (必填)",
+        "content-type": "application/json"
+      },
+      "request_body": "包含站点ID的整型数组，例如 [1, 2, 3] (必填)"
+    }
+  },
+  {
+    "question": [
+      "怎么给站点开启或关闭自定义端口功能？",
+      "我想让站点支持非80/443的端口，主开关在哪？",
+      "怎么关闭某个站点的自定义端口限制？",
+      "自定义端口的开关接口怎么传status值？0和1分别代表什么？",
+      "运维怎么通过API控制站点是否允许走自定义端口？"
+    ],
+    "answer": {
+      "url": "/api/site-switch/custom-port",
+      "method": "PUT",
+      "description": "启用或禁用站点的自定义端口主开关",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)",
+        "status": "数字，自定义端口是否开启(0:关闭, 1:开启) (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "我想给站点配置自定义的高端口，比如51000，怎么调接口？",
+      "怎么在非标准端口上配HTTPS或HTTP支持？",
+      "怎么在自定义端口配置里把默认的80或443端口给禁掉？",
+      "配置自定义端口时，HTTP和HTTPS的端口范围限制是多少？",
+      "配置非标端口的请求体JSON格式应该怎么写？"
+    ],
+    "answer": {
+      "url": "/api/site-conf/custom-port",
+      "method": "PUT",
+      "description": "配置站点的自定义非标准端口映射及协议",
+      "headers": {
+        "polestar-token": "API密钥 (必填)",
+        "content-type": "application/json"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)",
+        "disable80": "数字，是否禁用80端口(0:否, 1:是) (必填)",
+        "disable443": "数字，是否禁用443端口(0:否, 1:是) (必填)"
+      },
+      "request_body": [
+        {
+          "siteId": "数字，站点ID (必填)",
+          "port": "数字，支持的端口范围(HTTP: 41000-42000, HTTPS: 51000-52000) (必填)",
+          "type": "字符串，自定义端口的协议 (http / https) (必填)"
+        }
+      ]
+    }
+  },
+  {
+    "question": [
+      "怎么看当前站点都配了哪些自定义端口？",
+      "我想检查一下某个站点的高端口配置有没有生效，怎么查？",
+      "查特定站点非标端口列表的GET接口是什么？",
+      "如何调接口获取某个siteId下的自定义非标端口及协议？",
+      "能用API列出某个网站当前开通的所有自定义服务端口吗？"
+    ],
+    "answer": {
+      "url": "/api/site-conf/find-ports",
+      "method": "GET",
+      "description": "查看当前站点已配置的自定义非标准端口列表",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "老板要求网站必须支持HTTP2，怎么用API开启？",
+      "怎么关闭网站的HTTP2支持，退回到HTTP1？",
+      "修改站点HTTP版本的接口需要传什么参数？",
+      "http-version这个接口中，version参数传http2代表什么？",
+      "怎么调接口给指定站点开启HTTP/2加速？"
+    ],
+    "answer": {
+      "url": "api/site-conf/http-version",
+      "method": "PUT",
+      "description": "启用或禁用站点的HTTP2协议版本",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)",
+        "version": "字符串，协议版本选项(http1:关闭, http2:开启) (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "怎么开启站点的TLS版本控制开关？",
+      "我想通过API限制客户端的最低TLS版本，主开关怎么开？",
+      "如何禁用某个站点的ssl-tls版本策略控制？",
+      "启用TLS版本控制的PUT接口参数怎么传？",
+      "控制安全传输层TLS策略的开关API是什么？"
+    ],
+    "answer": {
+      "url": "/api/site-switch/ssl-tls",
+      "method": "PUT",
+      "description": "启用或禁用站点的TLS版本控制主开关",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)",
+        "status": "数字，安全开关状态(0:关闭, 1:开启) (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "我想把安全级别拉满，怎么强制站点只走TLS 1.3？",
+      "怎么修改站点的TLS版本？支持哪些老版本吗？",
+      "设置网站最低支持TLSv1.2的API应该怎么配置参数？",
+      "sslTls参数可以传哪些值来限定安全通道的握手协议？",
+      "如何下发最新的TLS1.3安全控制策略到指定站点？"
+    ],
+    "answer": {
+      "url": "/api/site-conf/ssl-tls",
+      "method": "PUT",
+      "description": "配置站点具体支持的最高/最低TLS协议版本",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)",
+        "sslTls": "字符串，可选版本(TLSv1, TLSv1.1, TLSv1.2, TLSv1.3) (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "安全合规要求网站开启HSTS，API怎么调？",
+      "怎么关闭站点的HSTS（严格安全传输）主开关？",
+      "开启HSTS的站点开关接口需要传哪些Query参数？",
+      "如何通过接口给指定siteId一键下发HSTS使能？",
+      "站点的hsts开关接口，把status置为1代表什么？"
+    ],
+    "answer": {
+      "url": "/api/site-switch/hsts",
+      "method": "PUT",
+      "description": "启用或禁用站点的HSTS功能主开关",
+      "headers": {
+        "polestar-token": "API密钥 (必填)"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)",
+        "status": "数字，开关状态(0:关闭, 1:开启) (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "我想设置HSTS的过期时间为一年，并且包含子域名，接口怎么写？",
+      "如何开启HSTS的Preload（预加载）功能？",
+      "配置HSTS高级参数的请求体长什么样？",
+      "hstsMax、hstsPreLoad、hstsSubDomain这几个参数具体怎么配置？",
+      "用API给网站注入HSTS响应头的缓存时间，应该调用哪个？"
+    ],
+    "answer": {
+      "url": "/api/site-conf/hsts",
+      "method": "PUT",
+      "description": "配置站点的HSTS详细参数（包括Max-Age、预加载、子域名）",
+      "headers": {
+        "polestar-token": "API密钥 (必填)",
+        "content-type": "application/json"
+      },
+      "query_params": {
+        "id": "数字，站点ID (必填)"
+      },
+      "request_body": {
+        "id": "数字，站点ID (必填)",
+        "hstsMax": "数字，过期时间（秒） (必填)",
+        "hstsPreLoad": "数字，预加载(0:关闭, 1:开启) (必填)",
+        "hstsSubDomain": "数字，包括子域名(0:关闭, 1:开启) (必填)"
+      }
+    }
+  },
+  {
+    "question": [
+      "怎么给某个站点添加域名解析记录？",
+      "我想用脚本自动绑定一个新域名到CDN普通站点，怎么调？",
+      "添加域名记录时，怎么顺便开启强制HTTPS和自动同步DNS记录？",
+      "为什么MNC站点（cname类型）不需要添加域名记录？",
+      "批量增加域名记录的nameList参数是数组格式吗？"
+    ],
+    "answer": {
+      "url": "/api/domain/create",
+      "method": "PUT",
+      "description": "在普通站点下添加域名记录，支持配置强制HTTPS和同步DNS",
+      "headers": {
+        "polestar-token": "API密钥 (必填)",
+        "content-type": "application/json"
+      },
+      "request_body": {
+        "siteId": "数字，站点ID (必填)",
+        "nameList": "数组，欲绑定的域名记录列表 (必填)",
+        "sslForce": "数字，强制https(1:启用, 0:禁用)，有证书时会自动跳转 (选填)",
+        "dnsEnable": "数字，同步DNS记录(1:开启, 0:默认)，自动添加一条CNAME记录 (选填)"
+      }
+    }
+  }
+]

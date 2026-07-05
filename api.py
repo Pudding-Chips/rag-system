@@ -37,27 +37,36 @@ class RAGHandler(BaseHTTPRequestHandler):
             return None
 
     def do_POST(self):
-        def check_auth(data: dict, workspace_id) -> bool:
+        def check_auth(data: dict, target_chat_id) -> bool:
             if not data or "token" not in data:
                 return False
             token = data.get("token")
             if not token:
                 return False
 
-            TENANT_TOKENS ={
-                "openclaw_group_A": os.getenv("TOKEN_GROUP_A", "GROUP_A_SECRET_2026"),
-                "openclaw_group_B": os.getenv("TOKEN_GROUP_B", "GROUP_B_SECRET_2026"),
-            }
+            cid = str(target_chat_id).strip()
+
             GLOBAL_ADMIN_TOKEN = os.getenv("RAG_ADMIN_TOKEN", "SYSTEM_SUPER_ADMIN_TOKEN")
-
-            wid = str(workspace_id).strip()
-
             if token == GLOBAL_ADMIN_TOKEN:
                 return True
 
-            expected_token = TENANT_TOKENS.get(wid)
+            tokens_file_path = os.path.join("config", "tokens.json")
+
+            if not os.path.exists(tokens_file_path):
+                print(f"[WARNING] Can't find {tokens_file_path}, token validate failed.")
+                return False
+            
+            try:
+                with open(tokens_file_path, "r", encoding="utf-8") as f:
+                    tenant_tokens =json.load(f)
+            except Exception as e:
+                print(f"error: Fail to read file: {e}")
+                return False
+
+            expected_token = tenant_tokens.get(cid)
             if expected_token and token == expected_token:
                 return True
+
             return False
 
         if self.path == "/rag/delete":
@@ -67,23 +76,24 @@ class RAGHandler(BaseHTTPRequestHandler):
                     self._send({"error": "Invalid JSON"}, 400)
                     return
 
-                workspace_id = data.get("workspace_id")
+                chat_id = data.get("chat_id")
                 biz = data.get("biz", DEFAULT_BIZ)
 
-                if not workspace_id or not str(workspace_id).strip():
-                    self._send({"error": "workspace_id cannot be empty"}, 400)
+                if not chat_id or not str(chat_id).strip():
+                    self._send({"error": "chat_id cannot be empty"}, 400)
                     return
 
-                if not check_auth(data, workspace_id):
+                cid = str(chat_id).strip()
+
+                if not check_auth(data, cid):
                     self._send({"error": "Unauthorized"}, 401)
                     return
 
                 target_coll = get_collection(biz)
 
                 if target_coll:
-                    wid = str(workspace_id).strip()
-                    target_coll.delete(where={"workspace_id": {"$eq": wid}})
-                    self._send({"message": f"Successfully cleared workspace: {wid} in biz: {biz}"})
+                    target_coll.delete(where={"chat_id": {"$eq": cid}})
+                    self._send({"message": f"Successfully cleared workspace: {cid} in biz: {biz}"})
                 else:
                     self._send({"error": "Database connection failed"}, 500)
                     return
@@ -101,10 +111,12 @@ class RAGHandler(BaseHTTPRequestHandler):
                     self._send({"error": "Invalid JSON"}, 400)
                     return
 
-                workspace_id = data.get("workspace_id")
-                if not workspace_id or not str(workspace_id).strip():
-                    self._send({"error": "workspace_id cannot be empty"}, 400)
+                chat_id = data.get("chat_id")
+                if not chat_id or not str(chat_id).strip():
+                    self._send({"error": "chat_id cannot be empty"}, 400)
                     return
+
+                cid = str(chat_id).strip()
 
                 request_file = data.get("json_file", "data/data.json")
                 file_name = os.path.basename(request_file)
@@ -114,13 +126,13 @@ class RAGHandler(BaseHTTPRequestHandler):
 
                 json_file = os.path.join("data", file_name)
 
-                if not check_auth(data, workspace_id):
+                if not check_auth(data, cid):
                     self._send({"error": "Unauthorized"}, 401)
-                    return
+                return
 
                 biz = data.get("biz", DEFAULT_BIZ)
                 result = fill_database(
-                    workspace_id=str(workspace_id).strip(), 
+                    workspace_id=cid, 
                     biz=biz, 
                     json_file=json_file, 
                     agent_id=data.get("agent_id", "unknown"), 
@@ -142,27 +154,31 @@ class RAGHandler(BaseHTTPRequestHandler):
 
                 query = data.get("query")
                 inbound_context = data.get("inbound_context", {})
-                workspace_id = data.get("workspace_id")
 
+                chat_id = data.get("chat_id")
                 if isinstance(inbound_context, dict):
-                    workspace_id = (
-                        inbound_context.get("workspace_id") or
-                        inbound_context.get("tenant_id") or
-                        inbound_context.get("session_id") or
-                        workspace_id
+                    chat_id = (
+                        inbound_context.get("chat_id") or
+                        inbound_context.get("user_id") or
+                        chat_id
                     )
 
-                if not query or not workspace_id:
-                    self._send({"error": "query or dynamic workspace_id cannot be empty"}, 400)
+                if not query or not chat_id:
+                    self._send({"error": "query or dynamic chat id cannot be empty"}, 400)
+                    return
+
+                cid = str(chat_id).strip()
+
+                if not check_auth(data, cid):
+                    self._send({"error": "Unauthorized"}, 401)
                     return
 
                 model = data.get("model", DEFAULT_MODEL)
                 biz = data.get("biz", DEFAULT_BIZ)
 
-                target_id = str(workspace_id).strip()
-                print(f"\n {target_id} | question: {query[:50]}")
+                print(f"\n [Telegram ID: {cid}] | question: {query[:50]}")
 
-                raw_docs = retrieve(query=query, workspace_id=target_id, model=model, biz=biz)
+                raw_docs = retrieve(query=query, workspace_id=cid, model=model, biz=biz)
                 print(f"retrieve: {len(raw_docs)}")
 
                 docs = rerank(query, raw_docs) if raw_docs else []
