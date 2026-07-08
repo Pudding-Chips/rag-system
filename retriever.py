@@ -85,7 +85,7 @@ if __name__ == "__main__":
         n_results=3
     )
 
-    print(f"\Found {len(test_docs)} result")
+    print(f"Found {len(test_docs)} result")
     for doc in test_docs:
         print(f"Content: {doc.page_content}")
         print(f"Similarity: {doc.metadata.get('relevance_score'):.4f}")

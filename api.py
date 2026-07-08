@@ -1,7 +1,7 @@
 """
 token校验、统一API
 """
-from http.server import ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
 import json
 import traceback
 import chromadb
@@ -92,8 +92,23 @@ class RAGHandler(BaseHTTPRequestHandler):
                 target_coll = get_collection(biz)
 
                 if target_coll:
+
+                    existing_data = target_coll.get(where={"chat_id": {"$eq": cid}}, limit=1)
+                    
+                    if not existing_data or not existing_data.get("ids"):
+                        # 💡 2. 如果根本没有找到任何 ID，说明第一次已经删空了，或者原本就是空的
+                        self._send({
+                            "message": f"Workspace: {cid} in biz: {biz} is already empty. No data to delete.",
+                            "deleted": False
+                        }, 200) # 返回 200，但明确告知没有变动
+                        return
+
                     target_coll.delete(where={"chat_id": {"$eq": cid}})
-                    self._send({"message": f"Successfully cleared workspace: {cid} in biz: {biz}"})
+                    self._send({
+                        "message": f"Successfully cleared workspace: {cid} in biz: {biz}",
+                        "deleted": True
+                    })
+                    return
                 else:
                     self._send({"error": "Database connection failed"}, 500)
                     return
@@ -101,7 +116,7 @@ class RAGHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 traceback.print_exc()
                 self._send({"error": str(e)}, 500)
-            return
+                return
 
         if self.path == "/rag/update":
             try:
@@ -131,14 +146,57 @@ class RAGHandler(BaseHTTPRequestHandler):
                     return
 
                 biz = data.get("biz", DEFAULT_BIZ)
+                agent_id = str(data.get("agent_id", "unknown"))
+                group_id = str(data.get("group_id", ""))
+
+                # ==========================================================
+                # 🔍 【关键修复 1】连接数据库并检查数据是否已经存在
+                # ==========================================================
+                target_coll = get_collection(biz)
+                if not target_coll:
+                    self._send({"error": "Database connection failed"}, 500)
+                    return
+
+                # 这里的字段名必须和 fill_database 写入向量数据库时的 metadata 字段完全一致！
+                where_filter = {
+                    "$and": [
+                        {"chat_id": {"$eq": cid}},
+                        {"agent_id": {"$eq": agent_id}},
+                        {"group_id": {"$eq": group_id}}
+                    ]
+                }
+
+                existing_data = target_coll.get(where=where_filter, limit=1)
+
+                # ==========================================================
+                # 🚦 【关键修复 2】如果数据已存在，直接拦截并返回 updated: False
+                # ==========================================================
+                if existing_data and existing_data.get("ids"):
+                    print(f"[INFO] Workspace {cid} (Agent: {agent_id}, Group: {group_id}) is already up-to-date. Skip.")
+                    self._send({
+                        "message": f"Data for agent: {agent_id}, group: {group_id} is already up-to-date. No update needed.",
+                        "updated": False
+                    })
+                    return
+
+                # ==========================================================
+                # 🚀 【数据不存在】第一次才会真正触发 fill_database 写入
+                # ==========================================================
+                print(f"[INFO] First-time sync triggered for workspace: {cid}...")
                 result = fill_database(
                     chat_id=cid, 
                     biz=biz, 
                     json_file=json_file, 
-                    agent_id=data.get("agent_id", "unknown"), 
-                    group_id=data.get("group_id", "")
+                    agent_id=agent_id, 
+                    group_id=group_id
                 )
-                self._send({"message": "Update successful", "detail": result})
+                
+                self._send({
+                    "message": "Update successful", 
+                    "detail": result,
+                    "updated": True  # 👈 明确告知客户端这是新插入/更新的数据
+                })
+                return
 
             except Exception as e:
                 traceback.print_exc()
@@ -188,8 +246,12 @@ class RAGHandler(BaseHTTPRequestHandler):
 
                 threshold = RERANK_THRESHOLD
                 has_knowledge = False
+                max_ctx_docs = 3
 
                 for i, d in enumerate(docs):
+                    if len(result_lines) >= max_ctx_docs:
+                        break
+
                     score = d.metadata.get("relevance_score", 0.0)
                     print(f"Ranking: {i+1} 分数: {score:.4f} | text: {d.page_content[:15]}...")
 
@@ -202,11 +264,17 @@ class RAGHandler(BaseHTTPRequestHandler):
                             f"**Standard Answer:** {answer}"
                         )
 
-                    formatted_sources.append({
-                        "matched_question": d.page_content,
-                        "content": d.metadata.get("answer", ""),
-                        "score": round(score, 4)
-                    })
+                        try:
+                            raw_answer = d.metadata.get("answer", "{}")
+                            ans_obj = json.loads(raw_answer)
+                        except Exception:
+                            ans_obj = d.metadata.get("answer", "")
+
+                        formatted_sources.append({
+                            "matched_question": d.page_content,
+                            "content": ans_obj, 
+                            "score": round(score, 4)
+                        })
 
                 context_for_ai = "\n\n---\n\n".join(result_lines) if result_lines else ""
 
@@ -220,10 +288,12 @@ class RAGHandler(BaseHTTPRequestHandler):
                     "sources": formatted_sources,
                     "biz": biz
                 })
+                return
+
             except Exception as e:
                 traceback.print_exc()
                 self._send({"error": str(e)}, 500)
-            return
+                return
 
         self._send({"error": "Not found"}, 404)
 
