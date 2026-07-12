@@ -5,8 +5,8 @@
     "token_url": "https://console.polestarcloud.com/user/setting",
     "login_restriction_url": "https://console.polestarcloud.com/user/setting",
     "environment_variables": {
-      "api_url": "https://api.polestarcloud.com",
-      "api_token": "XXXX"
+      "api_url": "{{POLESTAR_API_URL}}",
+      "api_token": "{{POLESTAR_TOKEN}}"
     },
     "security_note": "永远不要把你的API token告诉给任何人，如果不小心泄露了API key，请立刻删除此Key, 并可以另外生产新的Key。"
   },
@@ -49,7 +49,7 @@
           "name": "站点列表",
           "path": "/api/site/page",
           "method": "POST",
-          "curl_example": "curl \"$api_url/api/site/page\" -H \"content-type: application/json\" -H \"polestar-token: $api_token\" --data-raw '{\"keyWord\":\"\",\"searchPage\":{\"desc\":1,\"page\":1,\"pageSize\":5,\"sort\":\"\"},\"type\":\"cname,normal,ip\"}'",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/page\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"keyWord\":\"\",\"searchPage\":{\"desc\":1,\"page\":1,\"pageSize\":5,\"sort\":\"\"},\"type\":\"cname,normal,ip\"}'",
           "request_body": [
             { "field": "keyWord", "type": "string", "required": false, "description": "关键字查询" },
             { "field": "searchPage", "type": "object", "required": true, "description": "分页请求体(参考<公共请求体>)" },
@@ -76,7 +76,7 @@
           "name": "获取站点",
           "path": "/api/site/find-by-id",
           "method": "GET",
-          "curl_example": "curl \"$api_url/api/site/find-by-id?id=1\" -H \"content-type: application/json\" -H \"polestar-token: $api_token\"",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/find-by-id?id=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
           "request_params": [
             { "field": "id", "type": "int", "required": true, "description": "站点ID" }
           ],
@@ -101,7 +101,7 @@
           "name": "新增站点",
           "path": "/api/site/create",
           "method": "PUT",
-          "curl_example": "curl \"$api_url/api/site/create\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: $api_token\" --data-raw '{\"name\":\"example\",\"type\":\"normal\",\"upstreamList\":[{\"host\":\"1.1.1.1\",\"port\":\"80\"}],\"upstreamBalance\":\"ip_hash\",\"upstreamPortFlag\":0,\"upstreamProtocol\":\"http\"}'",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/create\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"name\":\"example\",\"type\":\"normal\",\"upstreamList\":[{\"host\":\"1.1.1.1\",\"port\":\"80\"}],\"upstreamBalance\":\"ip_hash\",\"upstreamPortFlag\":0,\"upstreamProtocol\":\"http\"}'",
           "request_body": [
             { "field": "name", "type": "string", "required": false, "description": "站点名称" },
             { "field": "type", "type": "string", "required": true, "description": "站点类型(normal:普通站点,cname:MNC站点,port:端口转发)" },
@@ -116,7 +116,7 @@
           "name": "修改站点",
           "path": "/api/site/modify",
           "method": "PUT",
-          "curl_example": "curl \"$api_url/api/site/modify\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: $api_token\" --data-raw '{\"id\":1,\"customerId\":1,\"name\":\"example\",\"description\":null,\"type\":\"normal\",\"upstreamList\":[{\"host\":\"1.1.1.1\",\"port\":80}],\"upstreamProtocol\":\"http\",\"upstreamPortFlag\":0,\"upstreamBalance\":\"ip_hash\",\"certCount\":null,\"dnsConfId\":null}'",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/modify\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"id\":1,\"customerId\":1,\"name\":\"example\",\"description\":null,\"type\":\"normal\",\"upstreamList\":[{\"host\":\"1.1.1.1\",\"port\":80}],\"upstreamProtocol\":\"http\",\"upstreamPortFlag\":0,\"upstreamBalance\":\"ip_hash\",\"certCount\":null,\"dnsConfId\":null}'",
           "request_body": [
             { "field": "id", "type": "int", "required": true, "description": "站点ID" },
             { "field": "name", "type": "string", "required": false, "description": "站点名称" },
@@ -147,7 +147,7 @@
           "name": "删除站点",
           "path": "/api/site/delete",
           "method": "DELETE",
-          "curl_example": "curl \"$api_url/api/site/delete?id=1\" -X \"DELETE\" -H \"content-type: application/json\" -H \"polestar-token: $api_token\"",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/delete?id=1\" -X \"DELETE\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
           "request_params": [
             { "field": "id", "type": "int", "required": true, "description": "站点ID" }
           ]
@@ -157,7 +157,7 @@
           "name": "禁用站点",
           "path": "/api/site/disable",
           "method": "PUT",
-          "curl_example": "curl \"$api_url/api/site/disable?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: $api_token\"",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/disable?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
           "request_params": [
             { "field": "id", "type": "int", "required": true, "description": "站点ID" }
           ]
@@ -167,7 +167,7 @@
           "name": "启用站点",
           "path": "/api/site/enable",
           "method": "PUT",
-          "curl_example": "curl \"$api_url/api/site/enable?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: $api_token\"",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/enable?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
           "request_params": [
             { "field": "id", "type": "int", "required": true, "description": "站点ID" }
           ]
@@ -177,7 +177,7 @@
           "name": "导出所选站点域名列表文件",
           "path": "/api/domain/export-list",
           "method": "POST",
-          "curl_example": "curl \"$api_url/api/domain/export-list\" -H \"content-type: application/json\" -H \"polestar-token: $api_token\" --data-raw '[1]'",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/domain/export-list\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[1]'",
           "request_params": [
             { "field": "data-raw", "type": "int", "required": true, "description": "请直接输入站点ID" }
           ]
