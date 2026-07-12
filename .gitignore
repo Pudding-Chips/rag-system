@@ -21,3 +21,5 @@ website_data.json
 requirements.txt
 skill.md
 data.json
+test_data.json
+config/tokens.json
