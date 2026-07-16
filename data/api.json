@@ -47,6 +47,7 @@
         {
           "id": "3.1.1",
           "name": "站点列表",
+          "description": "用于查询站点列表配置信息和状态",
           "path": "/api/site/page",
           "method": "POST",
           "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/page\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"keyWord\":\"\",\"searchPage\":{\"desc\":1,\"page\":1,\"pageSize\":5,\"sort\":\"\"},\"type\":\"cname,normal,ip\"}'",
@@ -69,7 +70,13 @@
             { "field": "upstreamBalance", "type": "string", "description": "负载方式(ip_hash:根据IP, poll:轮训, backup:备用机机制)" },
             { "field": "upstreamPortFlag", "type": "int", "description": "端口回源(1:启用, 0:禁用)，开启后会忽略源点" },
             { "field": "description", "type": "string", "description": "站点描述" }
-          ]
+          ],
+          "metadata":{
+            "category": "site",
+            "sub_category": "site_query",
+            "risk_level": "low",
+            "required_env": ["POLESTAR_TOKEN"]
+          }
         },
         {
           "id": "3.1.2",
@@ -94,7 +101,13 @@
             { "field": "upstreamBalance", "type": "string", "description": "负载方式(ip_hash:根据IP, poll:轮训, backup:备用机机制)" },
             { "field": "upstreamPortFlag", "type": "int", "description": "端口回源(1:启用, 0:禁用)，开启后会忽略源点" },
             { "field": "description", "type": "string", "description": "站点描述" }
-          ]
+          ],
+          "metadata": {
+          "category": "site",
+          "sub_category": "site_query",
+          "risk_level": "low",
+          "required_env": ["POLESTAR_TOKEN"]
+        }
         },
         {
           "id": "3.1.3",
@@ -109,7 +122,13 @@
             { "field": "upstreamBalance", "type": "string", "required": true, "description": "负载方式(ip_hash:根据IP, poll:轮训, backup:备用机机制)" },
             { "field": "upstreamPortFlag", "type": "int", "required": false, "description": "默认值为0, 按端口回源" },
             { "field": "upstreamProtocol", "type": "string", "required": true, "description": "回源协议(http\\https), 如果按端口回源会忽略该参数" }
-          ]
+          ],
+          "metadata": {
+          "category": "site",
+          "sub_category": "site_manage",
+          "risk_level": "medium",
+          "required_env": ["POLESTAR_TOKEN"]
+        }
         },
         {
           "id": "3.1.4",
@@ -140,7 +159,13 @@
             { "field": "upstreamBalance", "type": "string", "description": "负载方式(ip_hash:根据IP, poll:轮训, backup:备用机机制)" },
             { "field": "upstreamPortFlag", "type": "int", "description": "端口回源(1:启用, 0:禁用)，开启后会忽略源点" },
             { "field": "description", "type": "string", "description": "站点描述" }
-          ]
+          ],
+          "metadata": {
+          "category": "site",
+          "sub_category": "site_manage",
+          "risk_level": "medium",
+          "required_env": ["POLESTAR_TOKEN"]
+        }
         },
         {
           "id": "3.1.5",
@@ -150,7 +175,13 @@
           "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/delete?id=1\" -X \"DELETE\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
           "request_params": [
             { "field": "id", "type": "int", "required": true, "description": "站点ID" }
-          ]
+          ],
+          "metadata": {
+          "category": "site",
+          "sub_category": "site_delete",
+          "risk_level": "high",
+          "required_env": ["POLESTAR_TOKEN"]
+        }
         },
         {
           "id": "3.1.6",
@@ -160,7 +191,13 @@
           "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/disable?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
           "request_params": [
             { "field": "id", "type": "int", "required": true, "description": "站点ID" }
-          ]
+          ],
+          "metadata": {
+          "category": "site",
+          "sub_category": "site_control",
+          "risk_level": "medium",
+          "required_env": ["POLESTAR_TOKEN"]
+        }
         },
         {
           "id": "3.1.7",
@@ -170,7 +207,13 @@
           "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site/enable?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
           "request_params": [
             { "field": "id", "type": "int", "required": true, "description": "站点ID" }
-          ]
+          ],
+          "metadata": {
+          "category": "site",
+          "sub_category": "site_control",
+          "risk_level": "medium",
+          "required_env": ["POLESTAR_TOKEN"]
+        }
         },
         {
           "id": "3.1.8",
@@ -180,9 +223,1925 @@
           "curl_example": "curl \"{{POLESTAR_API_URL}}/api/domain/export-list\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[1]'",
           "request_params": [
             { "field": "data-raw", "type": "int", "required": true, "description": "请直接输入站点ID" }
-          ]
+          ],
+          "metadata": {
+          "category": "domain",
+          "sub_category": "domain_export",
+          "risk_level": "low",
+          "required_env": ["POLESTAR_TOKEN"]
+        }
         }
       ]
+    },
+    "3.2_protocol_configuration": {
+      "module_name": "协议配置",
+      "3.2.1_custom_port": {
+        "apis": [
+          {
+            "id": "3.2.1.1",
+            "name": "启用、禁用自定义端口",
+            "path": "/api/site-switch/custom-port",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/custom-port?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "自定义端口是否开启(0:关闭 1:开启)" }
+            ],
+            "metadata": {
+              "category": "port_config",
+              "sub_category": "port_control",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.2.1.2",
+            "name": "配置自定义端口",
+            "path": "/api/site-conf/custom-port",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/custom-port?id=1&disable80=0&disable443=0\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[{\"siteId\":1,\"port\":51001,\"type\":\"https\"}]'",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "disable80", "type": "int", "required": true, "description": "是否禁用80端口(0:否 1:是)" },
+              { "field": "disable443", "type": "int", "required": true, "description": "是否禁用443端口(0:否 1:是)" }
+            ],
+            "request_body": [
+              {
+                "field": "data-raw",
+                "type": "array",
+                "required": true,
+                "description": "自定义端口配置列表。每个对象包含：siteId (站点ID), port (端口号，HTTP范围: 41000-42000，HTTPS范围: 51000-52000), type (协议类型: http 或 https)"
+              }
+            ],
+            "metadata": {
+              "category": "port_config",
+              "sub_category": "port_manage",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.2.1.3",
+            "name": "查看自定义端口",
+            "path": "/api/site-conf/find-ports",
+            "method": "GET",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/find-ports?id=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "response_body_data_fields": [
+              { "field": "id", "type": "int", "description": "配置条目ID" },
+              { "field": "siteId", "type": "int", "description": "站点ID" },
+              { "field": "type", "type": "string", "description": "自定义端口的协议类型 (http / https)" },
+              { "field": "port", "type": "int", "description": "所支持的自定义端口号" }
+            ],
+            "metadata": {
+              "category": "port_config",
+              "sub_category": "port_query",
+              "risk_level": "low",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.2.2_http2": {
+        "apis": [
+          {
+            "id": "3.2.2.1",
+            "name": "启用、禁用HTTP2",
+            "path": "/api/site-conf/http-version",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/http-version?id=1&version=http2\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "version", "type": "string", "required": true, "description": "HTTP协议版本。可选值：http1 (表示关闭HTTP2，使用HTTP1.1), http2 (表示开启HTTP2)" }
+            ],
+            "metadata": {
+              "category": "protocol_config",
+              "sub_category": "http_version_control",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.2.3_TLS_version_control": {
+        "apis": [
+          {
+            "id": "3.2.3.1",
+            "name": "启用、禁用TLS版本控制",
+            "path": "/api/site-switch/ssl-tls",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/ssl-tls?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "是否开启TLS版本控制。可选值：0 (关闭，使用系统默认TLS策略), 1 (开启控制，允许自定义TLS版本)" }
+            ],
+            "metadata": {
+              "category": "ssl_tls_config",
+              "sub_category": "tls_control",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.2.3.2",
+            "name": "配置TLS版本控制",
+            "path": "/api/site-conf/ssl-tls",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/ssl-tls?id=1&sslTls=TLS1.3\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "sslTls", "type": "string", "required": true, "description": "需要限制或启用的最低/特定 TLS 版本。可选值包括：TLSv1, TLSv1.1, TLSv1.2, TLSv1.3。支持逗号拼接多个版本（如 \"TLSv1.2,TLSv1.3\"），大模型应引导用户使用高安全版本的 TLS1.2 或 TLS1.3" }
+            ],
+            "metadata": {
+              "category": "ssl_tls_config",
+              "sub_category": "tls_manage",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.2.4_HSTS": {
+        "apis": [
+          {
+            "id": "3.2.4.1",
+            "name": "启用、禁用HSTS",
+            "path": "/api/site-switch/hsts",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/hsts?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "是否开启HSTS功能。可选值：0 (关闭 HSTS 头部发送), 1 (启用 HSTS)" }
+            ],
+            "metadata": {
+              "category": "ssl_tls_config",
+              "sub_category": "hsts_control",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.2.4.2",
+            "name": "配置HSTS",
+            "path": "/api/site-conf/hsts",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/hsts?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"id\":1,\"hstsMax\":31536000,\"hstsPreLoad\":1,\"hstsSubDomain\":1}'",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID，需与 URL 路径参数一致" },
+              { "field": "hstsMax", "type": "int", "required": true, "description": "HSTS 缓存过期时间，单位为秒。常用值为 31536000 (即 1 年)" },
+              { "field": "hstsPreLoad", "type": "int", "required": true, "description": "是否开启 HSTS 预加载列表 (Preload)。可选值：0 (关闭), 1 (开启)" },
+              { "field": "hstsSubDomain", "type": "int", "required": true, "description": "HSTS 策略是否包含所有子域名。可选值：0 (关闭), 1 (开启)" }
+            ],
+            "metadata": {
+              "category": "ssl_tls_config",
+              "sub_category": "hsts_manage",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      }
+    },
+    "3.3_redirect_configuration": {
+      "module_name": "自定义跳转",
+      "3.3.1_custom_port": {
+        "apis": [
+          {
+            "id": "3.3.1.1",
+            "name": "启用、禁用自定义跳转主开关",
+            "path": "/api/site-switch/custom-redirect",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/custom-redirect?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "自定义跳转主开关。可选值：0 (关闭), 1 (开启)" }
+            ],
+            "metadata": {
+              "category": "redirect_config",
+              "sub_category": "redirect_control",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.1.2",
+            "name": "查询自定义跳转",
+            "path": "/api/site-redirect/page",
+            "method": "POST",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-redirect/page?siteId=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"searchPage\":{\"page\":1,\"pageSize\":10,\"desc\":0}}'",
+            "request_params": [
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              {
+                "field": "searchPage",
+                "type": "object",
+                "required": true,
+                "description": "分页查询对象。内含：page (当前页码，默认 1), pageSize (每页大小), desc (排序规则，0: 升序, 1: 降序)"
+              }
+            ],
+            "response_body_data_fields": [
+              { "field": "number", "type": "int", "description": "当前页码" },
+              { "field": "size", "type": "int", "description": "每页大小" },
+              { "field": "totalPages", "type": "int", "description": "总页数" },
+              { "field": "totalElements", "type": "int", "description": "总元素个数" },
+              { "field": "content", "type": "array", "description": "自定义跳转规则列表。单条规则包含 id (跳转规则ID), siteId, domainId, status, name (域名), displayName, target (目的地), type (uri:跳转至URL, domain:跳转至域名), method (301, 302, Frame), ruleId" }
+            ],
+            "metadata": {
+              "category": "redirect_config",
+              "sub_category": "redirect_query",
+              "risk_level": "low",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.1.3",
+            "name": "启用、禁用自定义跳转",
+            "path": "/api/site-redirect/status",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-redirect/status?id=1&siteId=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "自定义跳转规则ID" },
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "单条跳转规则状态。可选值：0 (禁用), 1 (启用)" }
+            ],
+            "metadata": {
+              "category": "redirect_config",
+              "sub_category": "redirect_control",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.1.4",
+            "name": "新增自定义跳转",
+            "path": "/api/site-redirect/batch-save",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-redirect/batch-save?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"type\":\"domain\",\"method\":\"301\",\"domainType\":\"custom\",\"domainList\":[\"domain.com\"],\"target\":\"example.com\"}'",
+            "request_params": [
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              { "field": "type", "type": "string", "required": true, "description": "跳转种类。可选值：uri (跳转至URL), domain (跳转至域名)" },
+              { "field": "method", "type": "string", "required": true, "description": "跳转方式。可选值：301 (永久跳转), 302 (临时跳转), Frame (隐性跳转)" },
+              { "field": "domainType", "type": "string", "required": true, "description": "跳转来源域名范围类型。可选值：all (当前站点所有域名), custom (自定义指定域名)" },
+              { "field": "domainList", "type": "array", "required": true, "description": "要进行跳转的来源域名列表（如 [\"domain.com\"]）" },
+              { "field": "target", "type": "string", "required": true, "description": "跳转目的地（如 \"example.com\"）" },
+              { "field": "ruleId", "type": "int", "required": false, "description": "匹配规则ID，不填默认为空" }
+            ],
+            "metadata": {
+              "category": "redirect_config",
+              "sub_category": "redirect_manage",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.1.5",
+            "name": "修改自定义跳转",
+            "path": "/api/site-redirect/save",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-redirect/save?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"id\":1,\"siteId\":1,\"domainId\":1,\"status\":1,\"name\":\"domain.com\",\"displayName\":\"domain.com\",\"target\":\"example.com\",\"type\":\"domain\",\"method\":\"301\"}'",
+            "request_params": [
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              { "field": "id", "type": "int", "required": true, "description": "自定义跳转规则ID" },
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "domainId", "type": "int", "required": true, "description": "域名ID" },
+              { "field": "status", "type": "int", "required": true, "description": "规则状态：0 (禁用), 1 (启用)" },
+              { "field": "name", "type": "string", "required": true, "description": "来源域名" },
+              { "field": "displayName", "type": "string", "required": true, "description": "域名的展示名称" },
+              { "field": "target", "type": "string", "required": true, "description": "跳转目的地" },
+              { "field": "type", "type": "string", "required": true, "description": "跳转种类：uri (跳转至URL), domain (跳转至域名)" },
+              { "field": "method", "type": "string", "required": true, "description": "跳转方式：301 (永久), 302 (临时), Frame (隐性)" },
+              { "field": "ruleId", "type": "int", "required": false, "description": "匹配规则ID" }
+            ],
+            "metadata": {
+              "category": "redirect_config",
+              "sub_category": "redirect_manage",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.1.6",
+            "name": "删除自定义跳转",
+            "path": "/api/site-redirect/delete",
+            "method": "DELETE",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-redirect/delete?id=1&siteId=1\" -X \"DELETE\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "自定义跳转规则ID" },
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "metadata": {
+              "category": "redirect_config",
+              "sub_category": "redirect_delete",
+              "risk_level": "high",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.1.7",
+            "name": "导出所有自定义跳转记录",
+            "path": "/api/site-redirect/export",
+            "method": "POST",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-redirect/export?siteId=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "metadata": {
+              "category": "redirect_config",
+              "sub_category": "redirect_query",
+              "risk_level": "low",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.3.2_advanced_redirect": {
+        "apis": [
+          {
+            "id": "3.3.2.1",
+            "name": "启用、禁用高级跳转主开关",
+            "path": "/api/site-switch/custom-rewrite",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/custom-rewrite?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "高级跳转主开关。可选值：0 (关闭), 1 (开启)" }
+            ],
+            "metadata": {
+              "category": "rewrite_config",
+              "sub_category": "rewrite_control",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.2.2",
+            "name": "查询高级跳转",
+            "path": "/api/site-rewrite/page",
+            "method": "POST",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-rewrite/page?siteId=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"searchPage\":{\"page\":1,\"pageSize\":10,\"desc\":0}}'",
+            "request_params": [
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              {
+                "field": "searchPage",
+                "type": "object",
+                "required": true,
+                "description": "分页查询对象。内含：page (当前页码，默认 1), pageSize (每页大小), desc (排序规则，0: 升序, 1: 降序)"
+              }
+            ],
+            "response_body_data_fields": [
+              { "field": "number", "type": "int", "description": "当前页码" },
+              { "field": "size", "type": "int", "description": "每页大小" },
+              { "field": "totalPages", "type": "int", "description": "总页数" },
+              { "field": "totalElements", "type": "int", "description": "总元素个数" },
+              { "field": "content", "type": "array", "description": "高级跳转规则列表。单条规则包含：id (规则ID), seqNum (优先级), name (规则名称), siteId, ruleId (匹配规则ID), uriRegex (正则表达式匹配串), target (目的地目标路径/URL), status (状态: 0禁用, 1启用), method (301, 302, Frame)" }
+            ],
+            "metadata": {
+              "category": "rewrite_config",
+              "sub_category": "rewrite_query",
+              "risk_level": "low",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.2.3",
+            "name": "启用、禁用高级跳转",
+            "path": "/api/site-rewrite/status",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-rewrite/status?id=1&siteId=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "高级跳转规则ID" },
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "单条高级跳转规则状态。可选值：0 (禁用), 1 (启用)" }
+            ],
+            "metadata": {
+              "category": "rewrite_config",
+              "sub_category": "rewrite_control",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.2.4",
+            "name": "新增高级跳转",
+            "path": "/api/site-rewrite/save",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-rewrite/save?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"seqNum\":1,\"method\":\"301\",\"status\":1,\"name\":\"example\",\"uriRegex\":\"/example\",\"target\":\"/example/target\"}'",
+            "request_params": [
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              { "field": "seqNum", "type": "int", "required": true, "description": "规则执行优先级数字，数字越小优先级越高" },
+              { "field": "method", "type": "string", "required": true, "description": "跳转或重写方式。可选值：301 (永久跳转), 302 (临时跳转), Frame (隐性跳转), 隐性回源" },
+              { "field": "status", "type": "int", "required": true, "description": "规则初始状态。可选值：0 (禁用), 1 (启用)" },
+              { "field": "name", "type": "string", "required": true, "description": "自定义高级跳转规则名称" },
+              { "field": "uriRegex", "type": "string", "required": true, "description": "匹配请求路径的正则表达式（例如：\"^/api/(.*)\"）" },
+              { "field": "target", "type": "string", "required": true, "description": "跳转/重写目的地（例如：\"/v2/api/$1\"）" }
+            ],
+            "metadata": {
+              "category": "rewrite_config",
+              "sub_category": "rewrite_manage",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.2.5",
+            "name": "修改高级跳转",
+            "path": "/api/site-rewrite/save",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-rewrite/save?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"id\":1,\"seqNum\":1,\"name\":\"example\",\"siteId\":1,\"ruleId\":0,\"uriRegex\":\"/example\",\"target\":\"/example/target\",\"status\":1,\"method\":\"301\"}'",
+            "request_params": [
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              { "field": "id", "type": "int", "required": true, "description": "高级跳转规则ID" },
+              { "field": "seqNum", "type": "int", "required": true, "description": "优先级，数字越小优先级越高" },
+              { "field": "name", "type": "string", "required": true, "description": "高级跳转规则名称" },
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "ruleId", "type": "int", "required": false, "description": "绑定的匹配规则ID" },
+              { "field": "uriRegex", "type": "string", "required": true, "description": "用于匹配请求路径的正则表达式" },
+              { "field": "target", "type": "string", "required": true, "description": "跳转/重写目的地" },
+              { "field": "status", "type": "int", "required": true, "description": "规则状态：0 (禁用), 1 (启用)" },
+              { "field": "method", "type": "string", "required": true, "description": "重写/跳转方式。可选值：301, 302, Frame, 隐性回源" }
+            ],
+            "metadata": {
+              "category": "rewrite_config",
+              "sub_category": "rewrite_manage",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.3.2.6",
+            "name": "删除高级跳转",
+            "path": "/api/site-rewrite/delete",
+            "method": "DELETE",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-rewrite/delete?siteId=1&id=1\" -X \"DELETE\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "id", "type": "int", "required": true, "description": "高级跳转规则ID" }
+            ],
+            "metadata": {
+              "category": "rewrite_config",
+              "sub_category": "rewrite_delete",
+              "risk_level": "high",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      }
+    },
+    "3.4_origin_configuration": {
+      "module_name": "回源配置",
+      "3.4.2_origin_host": {
+        "apis": [
+          {
+            "id": "3.4.2.1",
+            "name": "配置回源HOST",
+            "path": "/api/site-switch/proxy-host",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/proxy-host?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "回源HOST基本模式。可选值：0 (默认，使用访问的域名本身作为回源HOST), 1 (使用包含端口的完整访问域名作为回源HOST)" }
+            ],
+            "metadata": {
+              "category": "origin_config",
+              "sub_category": "origin_host_control",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.4.2.2",
+            "name": "配置自定义回源HOST",
+            "path": "/api/site-conf/proxy-host",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/proxy-host?id=1&proxyHost=example.com&httpFlag=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "proxyHost", "type": "string", "required": true, "description": "自定义的实际回源HOST域名（例如：\"example.com\"）" },
+              { "field": "httpFlag", "type": "int", "required": true, "description": "回源请求中HOST字段是否携带非标端口。可选值：0 (不带端口，仅保留域名), 1 (携带请求中的实际端口)" }
+            ],
+            "metadata": {
+              "category": "origin_config",
+              "sub_category": "origin_host_manage",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.4.3_origin_sni": {
+        "apis": [
+          {
+            "id": "3.4.3.1",
+            "name": "启用、禁用回源SNI",
+            "path": "/api/site-switch/sni",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/sni?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "是否开启回源SNI。可选值：0 (关闭), 1 (开启。开启后，HTTPS回源握手时会携带对应的域名)" }
+            ],
+            "metadata": {
+              "category": "origin_config",
+              "sub_category": "origin_sni_control",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      }
+    },
+    "3.5_cache_configuration": {
+      "module_name": "缓存管理",
+      "3.5.1_site_cache_purge": {
+        "apis": [
+          {
+            "id": "3.5.1.1",
+            "name": "整站清理缓存",
+            "path": "/api/site-purge/purge-by-site",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-purge/purge-by-site?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "siteId", "type": "int", "required": true, "description": "要清理缓存的站点ID" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_purge",
+              "risk_level": "high",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.5.2_cache_purge": {
+        "apis": [
+          {
+            "id": "3.5.2.1",
+            "name": "查询特定缓存清理",
+            "path": "/api/site-purge/list",
+            "method": "POST",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-purge/list?siteId=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "response_body_data_fields": [
+              { "field": "id", "type": "int", "description": "缓存清理规则ID" },
+              { "field": "siteId", "type": "int", "description": "站点ID" },
+              { "field": "type", "type": "string", "description": "清理类型。可选值：domain (按域名), uri (按URI), url (按完整URL)" },
+              { "field": "operateType", "type": "string", "description": "匹配模式。可选值：equals (等于), contains (包含), starting (开始于), ending (结束于)" },
+              { "field": "keyword", "type": "string", "description": "匹配的关键字值" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_purge_rule",
+              "risk_level": "low",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.5.2.2",
+            "name": "新增特定缓存清理",
+            "path": "/api/site-purge/create",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-purge/create\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"editMode\":true,\"type\":\"domain\",\"operateType\":\"equals\",\"keyword\":\"example.com\",\"siteId\":1}'",
+            "request_body": [
+              { "field": "editMode", "type": "boolean", "required": true, "description": "编辑模式，默认固定为 true" },
+              { "field": "siteId", "type": "int", "required": true, "description": "关联的站点ID" },
+              { "field": "type", "type": "string", "required": true, "description": "清理类型。可选值：domain (按域名), url (按URL), uri (按URI)" },
+              { "field": "operateType", "type": "string", "required": true, "description": "匹配模式。可选值：equals (等于), contains (包含), starting (以该字符开头), ending (以该字符结尾)" },
+              { "field": "keyword", "type": "string", "required": true, "description": "清理的目标关键字（例如：\"example.com\" 或 \"/static/css/\"）" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_purge_rule",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.5.2.3",
+            "name": "修改特定缓存清理",
+            "path": "/api/site-purge/modify",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-purge/modify\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"id\":1,\"siteId\":1,\"uniqueName\":null,\"areaIds\":null,\"type\":\"uri\",\"operateType\":\"contains\",\"keyword\":\"/12345\",\"editMode\":true}'",
+            "request_body": [
+              { "field": "id", "type": "int", "required": true, "description": "需要修改的缓存清理规则ID" },
+              { "field": "siteId", "type": "int", "required": true, "description": "关联的站点ID" },
+              { "field": "editMode", "type": "boolean", "required": true, "description": "编辑模式，默认固定为 true" },
+              { "field": "type", "type": "string", "required": true, "description": "清理类型：domain, url, uri" },
+              { "field": "operateType", "type": "string", "required": true, "description": "匹配模式：equals, contains, starting, ending" },
+              { "field": "keyword", "type": "string", "required": true, "description": "清理匹配关键字" },
+              { "field": "uniqueName", "type": "string", "required": false, "description": "唯一标示名，不修改填 null" },
+              { "field": "areaIds", "type": "array", "required": false, "description": "区域ID列表，不修改填 null" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_purge_rule",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.5.2.4",
+            "name": "特定缓存清理（触发规则执行）",
+            "path": "/api/site-purge/purge",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-purge/purge?id=1&siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "需要触发执行的缓存清理规则ID" },
+              { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_purge",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.5.2.5",
+            "name": "删除缓存清理规则",
+            "path": "/api/site-purge/delete",
+            "method": "DELETE",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-purge/delete?id=1\" -X \"DELETE\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "要删除的缓存清理规则ID" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_purge_rule",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.5.3_cache_configuration": {
+        "apis": [
+          {
+            "id": "3.5.3.1",
+            "name": "启用、禁用缓存基本设置",
+            "path": "/api/site-switch/cache-basic",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/cache-basic?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "基础缓存总开关。可选值：0 (关闭基础缓存策略), 1 (开启基础缓存策略)" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_basic_config",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.5.3.2",
+            "name": "查询缓存基本设置",
+            "path": "/api/site-conf/view",
+            "method": "GET",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/view?id=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "response_body_data_fields": [
+              { "field": "id", "type": "int", "description": "站点ID" },
+              { "field": "cacheMethod", "type": "string", "description": "缓存路由模式。extend: 根据后缀名缓存, full: 全部缓存, upstream: 遵循源站缓存设置" },
+              { "field": "cacheExt", "type": "string", "description": "匹配缓存的文件后缀名格式串，例如：\"[js][css][png]\"" },
+              { "field": "cacheTtl", "type": "string", "description": "CDN 节点缓存生存时间（TTL），如 31d(天), 12h(小时), 0s(永久)" },
+              { "field": "cacheControl", "type": "string", "description": "向下游浏览器透传的 Cache-Control 报头值。空值: 遵循源站, no-cache: 浏览器不缓存, 纯数字: 强制浏览器缓存 X 秒" },
+              { "field": "proxyHost", "type": "string", "description": "当前配置的回源HOST地址" },
+              { "field": "sslTls", "type": "string", "description": "当前启用的最低TLS版本限制" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_basic_config",
+              "risk_level": "low",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.5.3.3",
+            "name": "修改缓存基本设置",
+            "path": "/api/site-conf/cache-basic",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/cache-basic?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"cacheExt\":\"[js][css][png][jpg][jpeg][gif][apk][zip][mp4][bmp][svg][woff2][ipa][doc][pdf][ico][xml][cba]\",\"cacheTtl\":\"31d\",\"cacheMethod\":\"extend\",\"cacheControl\":\"0\"}'",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              { "field": "cacheMethod", "type": "string", "required": true, "description": "缓存策略方式。可选值：\"extend\" (根据后缀名匹配缓存), \"full\" (全量静态化缓存), \"upstream\" (透传并遵守源站 Cache-Control)" },
+              { "field": "cacheExt", "type": "string", "required": false, "description": "当 cacheMethod 为 extend 时必填。指定要缓存的文件后缀列表，格式严格为：\"[js][css][png]\"" },
+              { "field": "cacheTtl", "type": "string", "required": true, "description": "CDN 节点缓存有效期表达式。后缀支持：d(天), h(小时), m(分钟), s(秒)。特别注意：\"0s\" 代表永久缓存，不自动失效" },
+              { "field": "cacheControl", "type": "string", "required": false, "description": "浏览器缓存行为控制。可选值：\"\" (留空，表示完全使用源站响应头设置), \"no-cache\" (指示客户端每次都需回源校验), \"任意正整数数字\" (如 \"3600\"，强制客户端浏览器本地缓存该秒数)" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_basic_config",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.5.4_cache_slicing": {
+        "apis": [
+          {
+            "id": "3.5.4.1",
+            "name": "启用、禁用缓存切片主开关",
+            "path": "/api/site-switch/cache-slice",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/cache-slice?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "缓存切片总开关。可选值：0 (关闭切片缓存模式), 1 (开启切片缓存模式)" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_slice_config",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.5.4.2",
+            "name": "配置缓存切片",
+            "path": "/api/site-conf/cache-slice",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/cache-slice?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"cacheSliceExt\":\"[mp4][avi][rbmp][ts][flv]\"}'",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              { "field": "cacheSliceExt", "type": "string", "required": true, "description": "指定需要启用切片缓存的大文件后缀名列表。格式要求严格为中括号包裹连写，例如：\"[mp4][avi][ts]\"" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_slice_config",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.5.5_cache_rules": {
+        "apis": [
+          {
+            "id": "3.5.5.1",
+            "name": "启用、禁用缓存规则",
+            "path": "/api/site-switch/cache-rule",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/cache-rule?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "高级缓存规则总开关。可选值：0 (关闭), 1 (开启)" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_rule_config",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.5.5.2",
+            "name": "配置缓存规则",
+            "path": "/api/site-conf/cache-rule",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/cache-rule?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[{\"args\":1,\"ruleId\":1,\"ttl\":\"2s\",\"siteId\":1}]'",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              {
+                "field": "[]",
+                "type": "array",
+                "required": true,
+                "description": "缓存规则对象列表。单个规则对象包含：args (是否忽略URL参数, 0:是[不区分参数缓存], 1:否[区分参数缓存]), ruleId (绑定的匹配规则ID), ttl (缓存时间表达式，0s: 一直缓存, -1s: 不缓存, 自定义需带单位如 d/h/m/s), siteId (站点ID)"
+              }
+            ],
+            "response_body_data_fields": [
+              { "field": "id", "type": "int", "description": "生成的缓存规则策略ID" },
+              { "field": "siteId", "type": "int", "description": "站点ID" },
+              { "field": "ruleId", "type": "int", "description": "绑定的匹配规则ID" },
+              { "field": "ttl", "type": "string", "description": "生效的缓存时间值" },
+              { "field": "args", "type": "int", "description": "是否忽略参数标识：0(忽略), 1(不忽略)" },
+              { "field": "operate", "type": "int", "description": "操作类型标识" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_rule_config",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }    
+        ]
+      },
+      "3.5.6_cache_uri": {
+        "apis": [
+          {
+            "id": "3.5.6.1",
+            "name": "启用、禁用缓存URI",
+            "path": "/api/site-switch/cache-uri",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/cache-uri?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "URI缓存规则总开关。可选值：0 (关闭), 1 (开启)" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_uri_config",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.5.6.2",
+            "name": "查询缓存URI",
+            "path": "/api/site-conf/find-cache-uris",
+            "method": "GET",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/find-cache-uris?id=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "response_body_data_fields": [
+              { "field": "id", "type": "int", "description": "缓存URI规则策略ID" },
+              { "field": "siteId", "type": "int", "description": "站点ID" },
+              { "field": "uri", "type": "string", "description": "匹配的缓存URI路径或表达式" },
+              { "field": "operate", "type": "int", "description": "匹配模式。0: 等于(精确匹配), 1: 开始(前缀匹配), 2: 正则表达式" },
+              { "field": "ttl", "type": "string", "description": "缓存时间值，0s: 一直缓存, -1s: 不缓存, 自定义带单位(d/h/m/s)" },
+              { "field": "args", "type": "int", "description": "是否忽略URL参数。0: 是(忽略参数缓存), 1: 否(区分参数缓存)" }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_uri_config",
+              "risk_level": "low",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.5.6.3",
+            "name": "配置缓存URI",
+            "path": "/api/site-conf/cache-uri",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/cache-uri?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[{\"args\":0,\"operate\":0,\"uri\":\"/\",\"ttl\":\"1d\",\"siteId\":1}]'",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              {
+                "field": "[]",
+                "type": "array",
+                "required": true,
+                "description": "URI缓存规则对象列表。单个规则对象包含：args (是否忽略URL参数, 0:是, 1:否), operate (匹配方式, 0:等于, 1:开始, 2:正则表达式), uri (缓存URI路径串), ttl (缓存时间表达式，0s:一直缓存, -1s:不缓存, 可自定义单位), siteId (站点ID)"
+              }
+            ],
+            "metadata": {
+              "category": "cache_manage",
+              "sub_category": "cache_uri_config",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+    "3.5.7_cache_url": {
+      "apis": [
+        {
+          "id": "3.5.7.1",
+          "name": "启用、禁用预缓存URL",
+          "path": "/api/site-switch/cache-pre-uri",
+          "method": "PUT",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/cache-pre-uri?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+          "request_params": [
+            { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+            { "field": "status", "type": "int", "required": true, "description": "预缓存(缓存预热)总开关。可选值：0 (关闭), 1 (开启)" }
+          ],
+          "metadata": {
+            "category": "cache_manage",
+            "sub_category": "cache_prefetch_config",
+            "risk_level": "medium",
+            "required_env": ["POLESTAR_TOKEN"]
+          }
+        },
+        {
+          "id": "3.5.7.2",
+          "name": "查询预缓存URL",
+          "path": "/api/site-conf/find-cache-pre-uris",
+          "method": "GET",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/find-cache-pre-uris?id=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+          "request_params": [
+            { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+          ],
+          "response_body_data_fields": [
+            { "field": "id", "type": "int", "description": "预缓存规则ID" },
+            { "field": "siteId", "type": "int", "description": "站点ID" },
+            { "field": "uri", "type": "string", "description": "解析出的资源相对路径（URI）" },
+            { "field": "fullUri", "type": "string", "description": "预缓存文件的完整资源URL" },
+            { "field": "cacheDate", "type": "long", "description": "资源成功缓存到CDN节点的时间戳（毫秒），若尚未完成预热则返回 null" }
+          ],
+          "metadata": {
+            "category": "cache_manage",
+            "sub_category": "cache_prefetch_config",
+            "risk_level": "low",
+            "required_env": ["POLESTAR_TOKEN"]
+          }
+        },
+        {
+          "id": "3.5.7.3",
+          "name": "配置预缓存URL",
+          "path": "/api/site-conf/cache-pre-uri",
+          "method": "PUT",
+          "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/cache-pre-uri?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[{\"fullUri\":\"https://domain.com/example\",\"siteId\":1}]'",
+          "request_params": [
+            { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+          ],
+          "request_body": [
+            {
+              "field": "[]",
+              "type": "array",
+              "required": true,
+              "description": "需要下发预热的URL对象列表。单个对象包含：fullUri (需要被提前缓存在CDN边缘节点的完整资源URL), siteId (站点ID)"
+            }
+          ],
+          "metadata": {
+            "category": "cache_manage",
+            "sub_category": "cache_prefetch_config",
+            "risk_level": "medium",
+            "required_env": ["POLESTAR_TOKEN"]
+          }
+        }
+      ]
+    }
+  },
+  "3.6_advanced_configuration": {
+    "module_name": "缓存管理",
+        "3.6.1_cors_configuration": {
+          "apis": [
+            {
+              "id": "3.6.1.1",
+              "name": "启用、禁用跨域",
+              "path": "/api/site-switch/cross-domain",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/cross-domain?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+                { "field": "status", "type": "int", "required": true, "description": "跨域资源共享(CORS)总开关。可选值：0 (关闭跨域支持), 1 (开启跨域支持)" }
+              ],
+              "metadata": {
+                "category": "security_control",
+                "sub_category": "cors_config",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.6.1.2",
+              "name": "配置跨域匹配规则",
+              "path": "/api/site-conf/cross-domain-rule",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/cross-domain-rule?id=1&ruleId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+                { "field": "ruleId", "type": "int", "required": true, "description": "绑定的高级跨域匹配规则ID" }
+              ],
+              "metadata": {
+                "category": "security_control",
+                "sub_category": "cors_config",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            }
+          ]
+        },
+        "3.6.2_websocket_setting": {
+          "apis": [
+            {
+              "id": "3.6.2.1",
+              "name": "启用、禁用WebSocket",
+              "path": "/api/site-switch/websocket",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/websocket?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+                { "field": "status", "type": "int", "required": true, "description": "WebSocket 协议支持开关。可选值：0 (关闭，拒绝 WebSocket 握手升级), 1 (开启，允许并透传 WebSocket 长连接)" }
+              ],
+              "metadata": {
+                "category": "network_config",
+                "sub_category": "websocket_config",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            }
+          ]
+      },
+      "3.6.3_custom_header_setting": {
+        "apis": [
+          {
+            "id": "3.6.3.1",
+            "name": "启用、禁用自定义请求头",
+            "path": "/api/site-switch/custom-header",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/custom-header?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "自定义报头功能总开关。可选值：0 (关闭), 1 (开启)" }
+            ],
+            "metadata": {
+              "category": "headers_config",
+              "sub_category": "custom_headers",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.6.3.2",
+            "name": "查询自定义请求头",
+            "path": "/api/site-conf/find-headers",
+            "method": "GET",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/find-headers?id=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "response_body_data_fields": [
+              { "field": "id", "type": "int", "description": "自定义报头规则ID" },
+              { "field": "siteId", "type": "int", "description": "站点ID" },
+              { "field": "headKey", "type": "string", "description": "HTTP报头字段名（如 Access-Control-Allow-Origin）" },
+              { "field": "headValue", "type": "string", "description": "自定义的报头字段值" },
+              { "field": "type", "type": "string", "description": "报头类别。request: 自定义请求头, response: 自定义响应头" },
+              { "field": "ruleId", "type": "int", "description": "绑定的高级匹配规则ID，无特定规则绑定时返回 null" }
+            ],
+            "metadata": {
+              "category": "headers_config",
+              "sub_category": "custom_headers",
+              "risk_level": "low",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.6.3.3",
+            "name": "配置自定义请求头",
+            "path": "/api/site-conf/custom-header",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/custom-header?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[{\"siteId\":1,\"headKey\":\"Access-Control-Allow-Origin\",\"headValue\":\"example\",\"type\":\"response\",\"ruleId\":null}]'",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              {
+                "field": "[]",
+                "type": "array",
+                "required": true,
+                "description": "注意：此配置是【完全覆盖操作】。需传入该站点期望生效的完整规则对象列表。单个对象包含：type (报头类别, request/response), headKey (报头字段名), headValue (字段值), siteId (站点ID), ruleId (可选匹配规则ID，不绑定传 null)"
+              }
+            ],
+            "metadata": {
+              "category": "headers_config",
+              "sub_category": "custom_headers",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.6.4_website_charset": {
+        "apis": [
+          {
+            "id": "3.6.4.1",
+            "name": "启用、禁用网站编码",
+            "path": "/api/site-switch/charset",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/charset?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "网站字符编码自定义功能开关。可选值：0 (关闭，遵循源站响应头编码), 1 (开启，强制覆盖为指定编码)" }
+            ],
+            "metadata": {
+              "category": "headers_config",
+              "sub_category": "charset_config",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.6.4.2",
+            "name": "配置网站编码",
+            "path": "/api/site-conf/charset",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/charset?id=1&charset=utf-8\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "charset", "type": "string", "required": true, "description": "目标字符集编码类型。可选值包括：\"utf-8\", \"gbk\", \"gb2312\", \"ISO-88509-1\"(或标准的 ISO-8859-1)" }
+            ],
+            "metadata": {
+              "category": "headers_config",
+              "sub_category": "charset_config",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.6.5_lt_bandwidth": {
+        "apis": [
+          {
+            "id": "3.6.5.1",
+            "name": "启用、禁用下载带宽限制总开关",
+            "path": "/api/site-switch/lt-bandwidth",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/lt-bandwidth?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "下载带宽限制功能总开关。可选值：0 (禁用限速规则), 1 (启用限速规则)" }
+            ],
+            "metadata": {
+              "category": "security_control",
+              "sub_category": "bandwidth_limit",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.6.5.2",
+            "name": "查询下载带宽限制",
+            "path": "/api/site-waf/find-limit-bandwidth",
+            "method": "GET",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/find-limit-bandwidth?id=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "response_body_data_fields": [
+              { "field": "id", "type": "int", "description": "下载带宽限制规则策略ID" },
+              { "field": "ruleId", "type": "int", "description": "绑定的高级匹配规则ID" },
+              { "field": "siteId", "type": "int", "description": "站点ID" },
+              { "field": "bandwidth", "type": "int", "description": "限制的最高下载带宽速度，单位为 Mbps" }
+            ],
+            "metadata": {
+              "category": "security_control",
+              "sub_category": "bandwidth_limit",
+              "risk_level": "low",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          },
+          {
+            "id": "3.6.5.3",
+            "name": "配置下载带宽限制",
+            "path": "/api/site-waf/limit-bandwidth",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/limit-bandwidth?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[{\"id\":1,\"ruleId\":1,\"siteId\":1,\"bandwidth\":30}]'",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+            ],
+            "request_body": [
+              {
+                "field": "[]",
+                "type": "array",
+                "required": true,
+                "description": "注意：此配置是【完全覆盖操作】。需传入该站点期望生效的完整限速规则对象列表。单个规则对象包含：bandwidth (限制带宽大小，单位Mbps), ruleId (可选绑定的匹配规则ID), siteId (站点ID)"
+              }
+            ],
+            "response_body_data_fields": [
+              { "field": "id", "type": "int", "description": "生成的下载带宽限制规则策略ID" },
+              { "field": "ruleId", "type": "int", "description": "绑定的高级匹配规则ID" },
+              { "field": "siteId", "type": "int", "description": "站点ID" },
+              { "field": "bandwidth", "type": "int", "description": "已生效的最高下载带宽速度，单位为 Mbps" }
+            ],
+            "metadata": {
+              "category": "security_control",
+              "sub_category": "bandwidth_limit",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.6_page_lang": {
+        "apis": [
+          {
+            "id": "3.6.6.1",
+            "name": "配置CDN相关页面语言",
+            "path": "/api/site-conf/page-lang",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-conf/page-lang?id=1&lang=zh_cn\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "lang", "type": "string", "required": true, "description": "错误及拦截提示页面的目标语言代码。可选值：\"zh_cn\" (中文简体), \"zh_tw\" (中文繁体), \"en_us\" (英文)" }
+            ],
+            "metadata": {
+              "category": "headers_config",
+              "sub_category": "page_language_config",
+              "risk_level": "low",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      },
+      "3.6.7_page_lang": {
+        "apis": [
+          {
+            "id": "3.6.7.1",
+            "name": "启用、禁用强制HTTPS内容加载",
+            "path": "/api/site-switch/replace-http",
+            "method": "PUT",
+            "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/replace-http?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+            "request_params": [
+              { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+              { "field": "status", "type": "int", "required": true, "description": "强制 HTTPS 内容改写开关（解决混合内容问题）。可选值：0 (关闭，保持页面源码原始链接), 1 (开启，自动将页面中的 http:// 资源链接改写为 https://)" }
+            ],
+            "metadata": {
+              "category": "security_control",
+              "sub_category": "https_enforcement",
+              "risk_level": "medium",
+              "required_env": ["POLESTAR_TOKEN"]
+            }
+          }
+        ]
+      }
+    },
+    "3.7_access_control": {
+      "module_name": "访问控制",
+        "3.7.1_white_ip_list": {
+          "apis": [
+            {
+              "id": "3.7.1.1",
+              "name": "启用、禁用白名单总开关",
+              "path": "/api/site-switch/waf-white",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/waf-white?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+                { "field": "status", "type": "int", "required": true, "description": "WAF白名单功能总开关。可选值：0 (关闭白名单过滤), 1 (启用白名单过滤)" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.2",
+              "name": "查询IPV4白名单列表",
+              "path": "/api/site-waf/white-ips",
+              "method": "POST",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/white-ips?siteId=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"searchPage\":{\"page\":1,\"pageSize\":10,\"desc\":0}}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "searchPage.page", "type": "int", "required": true, "description": "页码，从1开始" },
+                { "field": "searchPage.pageSize", "type": "int", "required": true, "description": "每页限制条数" },
+                { "field": "searchPage.desc", "type": "int", "required": false, "description": "排序顺序。0: 升序, 1: 降序" }
+              ],
+              "response_body_data_fields": [
+                { "field": "number", "type": "int", "description": "当前页码" },
+                { "field": "size", "type": "int", "description": "每页容量" },
+                { "field": "totalPages", "type": "int", "description": "总页数" },
+                { "field": "totalElements", "type": "int", "description": "总规则条数" },
+                { "field": "content[].siteId", "type": "int", "description": "站点ID" },
+                { "field": "content[].whiteIp", "type": "string", "description": "白名单IPv4地址或网段" },
+                { "field": "content[].remark", "type": "string", "description": "备注说明" },
+                { "field": "content[].createDate", "type": "long", "description": "规则创建时间戳" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "low",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.3",
+              "name": "新增IPV4白名单",
+              "path": "/api/site-waf/add-white-ips",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/add-white-ips?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"whiteIps\":[\"1.1.1.1\"],\"remark\":\"example\"}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "whiteIps", "type": "array", "required": true, "description": "欲添加的IPv4地址数组（支持单IP或网段）" },
+                { "field": "remark", "type": "string", "required": false, "description": "备注说明" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.4",
+              "name": "删除IPV4白名单",
+              "path": "/api/site-waf/del-white-ips",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/del-white-ips?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"whiteIps\":[\"1.1.1.1\"]}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "whiteIps", "type": "array", "required": true, "description": "要从白名单中移出的IPv4地址数组" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.5",
+              "name": "查询IPV6白名单列表",
+              "path": "/api/site-waf/white-ipv6s",
+              "method": "POST",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/white-ipv6s?siteId=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"searchPage\":{\"page\":1,\"pageSize\":10,\"desc\":0}}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "searchPage.page", "type": "int", "required": true, "description": "页码，从1开始" },
+                { "field": "searchPage.pageSize", "type": "int", "required": true, "description": "每页条数" },
+                { "field": "searchPage.desc", "type": "int", "required": false, "description": "排序顺序。0: 升序, 1: 降序" }
+              ],
+              "response_body_data_fields": [
+                { "field": "number", "type": "int", "description": "当前页码" },
+                { "field": "size", "type": "int", "description": "每页限制数" },
+                { "field": "totalPages", "type": "int", "description": "总页数" },
+                { "field": "totalElements", "type": "int", "description": "IPv6规则总数" },
+                { "field": "content[].siteId", "type": "int", "description": "站点ID" },
+                { "field": "content[].whiteIp", "type": "string", "description": "白名单IPv6地址" },
+                { "field": "content[].remark", "type": "string", "description": "备注说明" },
+                { "field": "content[].createDate", "type": "long", "description": "规则创建时间戳" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "low",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.6",
+              "name": "新增IPV6白名单",
+              "path": "/api/site-waf/add-white-ipv6s",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/add-white-ipv6s?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"whiteIps\":[\"0000:0000:0000:0000:0000:0000:0000:0000\"],\"remark\":\"example\"}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "whiteIps", "type": "array", "required": true, "description": "欲添加的IPv6白名单地址列表" },
+                { "field": "remark", "type": "string", "required": true, "description": "备注信息说明" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.7",
+              "name": "删除IPV6白名单",
+              "path": "/api/site-waf/del-white-ipv6s",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/del-white-ipv6s?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"whiteIps\":[\"0000:0000:0000:0000:0000:0000:0000:0000\"]}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "whiteIps", "type": "array", "required": true, "description": "欲删除的IPv6地址列表" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.8",
+              "name": "仅允许白名单IP访问",
+              "path": "/api/site-waf/white-ip-deny",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/white-ip-deny?siteId=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" },
+                { "field": "status", "type": "int", "required": true, "description": "是否开启IP强校验拦截。开启(1)后，【仅允许】IPv4/IPv6白名单内的IP访问该站点，其余IP访问将全部被阻断(返回WAF拦截页)；关闭(0)则不强制限制IP。" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "high",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.9",
+              "name": "配置白名单UA",
+              "path": "/api/site-waf/white-ua",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/white-ua?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[\"example\"]'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "[]", "type": "array", "required": true, "description": "这是一个覆盖操作。接收白名单User-Agent特征字符串的JSON数组。匹配该UA标识的请求将绕过对应的防御拦截。" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.10",
+              "name": "仅允许白名单UA访问",
+              "path": "/api/site-waf/white-ua-deny",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/white-ua-deny?siteId=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" },
+                { "field": "status", "type": "int", "required": true, "description": "是否开启UA强校验。开启(1)后，【仅允许】包含白名单UA特征的请求访问，其余所有客户端访问均被直接阻断；关闭(0)不强制。" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "high",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.11",
+              "name": "配置白名单URI",
+              "path": "/api/site-waf/white-uri",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/white-uri?id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[{\"uri\":\"/example\",\"id\":1}]'",
+              "request_params": [
+                { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "[]", "type": "array", "required": true, "description": "这是一个覆盖操作。配置的白名单URI数组。单个对象包含：uri (需要放行的URI相对路径), siteId (站点ID)" }
+              ],
+              "response_body_data_fields": [
+                { "field": "id", "type": "int", "description": "新增成功的白名单URI主键ID" },
+                { "field": "siteId", "type": "int", "description": "站点ID" },
+                { "field": "uri", "type": "string", "description": "生效的白名单URI相对路径" },
+                { "field": "createDate", "type": "long", "description": "创建时间戳" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.12",
+              "name": "仅允许白名单URI访问",
+              "path": "/api/site-waf/white-uri-deny",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/white-uri-deny?siteId=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" },
+                { "field": "status", "type": "int", "required": true, "description": "是否开启URI隔离防护模式。开启(1)后，整站外部用户【只能访问】白名单内录入的URI（例如只允许访问特定静态展示页），其余任何请求均阻断；关闭(0)不强制限制。" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "high",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.13",
+              "name": "配置白名单国家",
+              "path": "/api/site-waf/white-country",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/white-country?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[\"EXAMPLE\"]'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "[]", "type": "array", "required": true, "description": "这是一个覆盖操作。接收允许通行的国家/地区代码数组。格式通常为大写ISO双字母（如 [\"CN\",\"US\"]）" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.1.14",
+              "name": "仅允许白名单国家访问",
+              "path": "/api/site-waf/white-country-deny",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/white-country-deny?siteId=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" },
+                { "field": "status", "type": "int", "required": true, "description": "地理围栏开关。开启(1)后，【仅允许】源自白名单国家/地区地域IP的终端请求访问站点，来自其他国家的请求会被拒绝；关闭(0)关闭地缘围栏限制。" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_whitelist",
+                "risk_level": "high",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            }
+          ]
+        },
+        "3.7.2_white_ip_list": {
+          "apis": [
+            {
+              "id": "3.7.2.1",
+              "name": "启用、禁用黑名单总开关",
+              "path": "/api/site-switch/waf-black",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/waf-black?status=1&id=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+                { "field": "status", "type": "int", "required": true, "description": "WAF黑名单功能总开关。可选值：0 (关闭黑名单拦截规则), 1 (启用黑名单拦截规则)" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.2.2",
+              "name": "启用、禁用黑名单代理访问",
+              "path": "/api/site-switch/waf-xff",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/waf-xff?id=1&status=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "id", "type": "int", "required": true, "description": "站点ID" },
+                { "field": "status", "type": "int", "required": true, "description": "代理IP检查（XFF头校验）开关。开启(1)后，WAF将透传解析 X-Forwarded-For 报头，并对多层代理后的真实源IP应用黑名单拦截；关闭(0)则仅校验直连TCP的边缘节点边缘IP。" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.2.3",
+              "name": "查询黑名单IPV4列表",
+              "path": "/api/site-waf/black-ips",
+              "method": "POST",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/black-ips?siteId=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"searchPage\":{\"page\":1,\"pageSize\":10,\"desc\":0}}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "searchPage.page", "type": "int", "required": true, "description": "页码，从1开始" },
+                { "field": "searchPage.pageSize", "type": "int", "required": true, "description": "每页条数" },
+                { "field": "searchPage.desc", "type": "int", "required": false, "description": "排序顺序。0: 升序, 1: 降序" }
+              ],
+              "response_body_data_fields": [
+                { "field": "number", "type": "int", "description": "当前页码" },
+                { "field": "size", "type": "int", "description": "每页容量" },
+                { "field": "totalPages", "type": "int", "description": "总页数" },
+                { "field": "totalElements", "type": "int", "description": "IPv4黑名单规则总数" },
+                { "field": "content[].siteId", "type": "int", "description": "站点ID" },
+                { "field": "content[].blackIp", "type": "string", "description": "被封禁的IPv4地址或网段" },
+                { "field": "content[].remark", "type": "string", "description": "备注说明" },
+                { "field": "content[].createDate", "type": "long", "description": "创建时间戳" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "low",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.2.4",
+              "name": "新增IPV4黑名单",
+              "path": "/api/site-waf/add-black-ips",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/add-black-ips?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"blackIps\":[\"1.1.1.1\"],\"remark\":\"example\"}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "blackIps", "type": "array", "required": true, "description": "要添加封禁的IPv4地址数组（支持单IP或网段）" },
+                { "field": "remark", "type": "string", "required": false, "description": "备注封禁原因" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.2.5",
+              "name": "删除IPV4黑名单",
+              "path": "/api/site-waf/del-black-ips",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/del-black-ips?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"blackIps\":[\"1.1.1.1\"]}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "blackIps", "type": "array", "required": true, "description": "欲解除封禁的IPv4地址数组" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.2.6",
+              "name": "查询IPV6黑名单",
+              "path": "/api/site-waf/black-ipv6s",
+              "method": "POST",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/black-ipv6s?siteId=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"searchPage\":{\"page\":1,\"pageSize\":10,\"desc\":0}}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "searchPage.page", "type": "int", "required": true, "description": "页码，从1开始" },
+                { "field": "searchPage.pageSize", "type": "int", "required": true, "description": "每页条数" },
+                { "field": "searchPage.desc", "type": "int", "required": false, "description": "排序顺序。0: 升序, 1: 降序" }
+              ],
+              "response_body_data_fields": [
+                { "field": "number", "type": "int", "description": "当前页码" },
+                { "field": "size", "type": "int", "description": "每页容量" },
+                { "field": "totalPages", "type": "int", "description": "总页数" },
+                { "field": "totalElements", "type": "int", "description": "IPv6黑名单规则总数" },
+                { "field": "content[].siteId", "type": "int", "description": "站点ID" },
+                { "field": "content[].blackIp", "type": "string", "description": "被封禁的IPv6地址" },
+                { "field": "content[].remark", "type": "string", "description": "备注说明" },
+                { "field": "content[].createDate", "type": "long", "description": "创建时间戳" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "low",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.2.7",
+              "name": "新增IPV6黑名单",
+              "path": "/api/site-waf/add-black-ipv6s",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/add-black-ipv6s?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"blackIps\":[\"0000:0000:0000:0000:0000:0000:0000:0000\"],\"remark\":\"test\"}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "blackIps", "type": "array", "required": true, "description": "要添加封禁的IPv6地址数组" },
+                { "field": "remark", "type": "string", "required": false, "description": "备注说明" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.2.8",
+              "name": "删除IPV6黑名单",
+              "path": "/api/site-waf/del-black-ipv6s",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/del-black-ipv6s?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '{\"blackIps\":[\"0000:0000:0000:0000:0000:0000:0000:0000\"]}'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "blackIps", "type": "array", "required": true, "description": "欲解除封禁的IPv6地址数组" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.2.9",
+              "name": "配置黑名单UA",
+              "path": "/api/site-waf/black-ua",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/black-ua?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[\"example\"]'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "[]", "type": "array", "required": true, "description": "这是一个覆盖操作。接收需要拦截封禁的User-Agent恶意特征字符串的JSON数组（如特定的扫描器或爬虫标识）" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.2.10",
+              "name": "配置黑名单国家",
+              "path": "/api/site-waf/black-country",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/black-country?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[\"EXAMPLE\"]'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "[]", "type": "array", "required": true, "description": "这是一个覆盖操作。接收全面阻断封禁的国家/地区代码代码数组（大写ISO标准，如 [\"US\",\"KP\"]）" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.7.2.11",
+              "name": "配置黑名单自治系统(AS Number)",
+              "path": "/api/site-waf/black-asnum",
+              "method": "PUT",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/black-asnum?siteId=1\" -X \"PUT\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\" --data-raw '[{\"asnum\":\"as1001\",\"remark\":\"example\"}]'",
+              "request_params": [
+                { "field": "siteId", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "request_body": [
+                { "field": "[]", "type": "array", "required": true, "description": "这是一个覆盖操作。接收需要封禁的AS网络自治系统号对象列表。单个对象包含：asnum (自治系统编号字符串，如 \"AS1001\"), remark (可选备注)" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_blacklist",
+                "risk_level": "medium",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            }
+          ]
+        }
+      },
+    "3.8_lt_switch": {
+    "module_name": "限速配置",
+        "3.6.1_lt_switch": {
+          "apis": [
+            {
+              "id": "3.8.0.1",
+              "name": "查询相关功能开关状态",
+              "path": "/api/site-switch/view",
+              "method": "GET",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-switch/view?id=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "response_body_data_fields": [
+                { "field": "id", "type": "int", "description": "站点ID" },
+                { "field": "websocket", "type": "int", "description": "WebSocket 协议支持开关 (0:关闭, 1:开启)" },
+                { "field": "sni", "type": "int", "description": "SNI (Server Name Indication) 校验开关 (0:关闭, 1:开启)" },
+                { "field": "crossDomain", "type": "int", "description": "跨域配置开关 (0:关闭, 1:开启)" },
+                { "field": "remoteIp", "type": "int", "description": "获取真实客户端IP开关 (0:关闭, 1:开启)" },
+                { "field": "hsts", "type": "int", "description": "HSTS 强安全性标头开关 (0:关闭, 1:开启)" },
+                { "field": "customPort", "type": "int", "description": "自定义非标准端口支持开关 (0:关闭, 1:开启)" },
+                { "field": "proxyHost", "type": "int", "description": "反向代理 Host 透传开关 (0:关闭, 1:开启)" },
+                { "field": "charset", "type": "int", "description": "强制字符集编码开关 (0:关闭, 1:开启)" },
+                { "field": "customHeader", "type": "int", "description": "自定义请求/响应头修改开关 (0:关闭, 1:开启)" },
+                { "field": "cache", "type": "int", "description": "全局缓存优化总开关 (0:关闭, 1:开启)" },
+                { "field": "cacheBasic", "type": "int", "description": "基础静态资源缓存开关 (0:关闭, 1:开启)" },
+                { "field": "cacheSlice", "type": "int", "description": "大文件切片缓存支持开关 (0:关闭, 1:开启)" },
+                { "field": "cacheRule", "type": "int", "description": "高级缓存规则匹配开关 (0:关闭, 1:开启)" },
+                { "field": "cacheUri", "type": "int", "description": "基于指定URI的缓存开关 (0:关闭, 1:开启)" },
+                { "field": "cachePreUri", "type": "int", "description": "URI前缀预缓存开关 (0:关闭, 1:开启)" },
+                { "field": "cacheArgs", "type": "int", "description": "缓存忽略/包含URL查询参数开关 (0:关闭, 1:开启)" },
+                { "field": "sslTls", "type": "int", "description": "SSL/TLS 硬件加速与证书校验开关 (0:关闭, 1:开启)" },
+                { "field": "replaceHttp", "type": "int", "description": "HTTP 资源链接自动重写/替换开关 (0:关闭, 1:开启)" },
+                { "field": "customRedirect", "type": "int", "description": "自定义重定向规则开关 (0:关闭, 1:开启)" },
+                { "field": "customRewrite", "type": "int", "description": "自定义URL重写(伪静态)开关 (0:关闭, 1:开启)" },
+                { "field": "customUriPage", "type": "int", "description": "自定义特定URI拦截错误页面开关 (0:关闭, 1:开启)" },
+                { "field": "customCodePage", "type": "int", "description": "自定义HTTP状态码错误页面开关 (0:关闭, 1:开启)" },
+                { "field": "blackIpPage", "type": "int", "description": "IP黑名单拦截自定义美化页面开关 (0:关闭, 1:开启)" },
+                { "field": "blackAreaPage", "type": "int", "description": "区域地理位置阻断自定义美化页面开关 (0:关闭, 1:开启)" },
+                { "field": "ccSwitch", "type": "int", "description": "CC攻击防护拦截总开关 (0:关闭, 1:开启)" },
+                { "field": "ccJsChallenge", "type": "int", "description": "CC防护-JavaScript人机浏览器质询检测开关 (0:关闭, 1:开启)" },
+                { "field": "ccCookie302", "type": "int", "description": "CC防护-Cookie 302重定向合规校验开关 (0:关闭, 1:开启)" },
+                { "field": "ccRecaptcha", "type": "int", "description": "CC防护-谷歌高级验证码交互质询开关 (0:关闭, 1:开启)" },
+                { "field": "ccFiveSec", "type": "int", "description": "CC防护-5秒盾强力等待防护页面开关 (0:关闭, 1:开启)" },
+                { "field": "ccThreeSec", "type": "int", "description": "CC防护-3秒盾强力等待防护页面开关 (0:关闭, 1:开启)" },
+                { "field": "ccSlide", "type": "int", "description": "CC防护-滑动拖动条图形人机验证开关 (0:关闭, 1:开启)" },
+                { "field": "ltSwitch", "type": "int", "description": "速率限制(QPS限速)总开关 (0:关闭, 1:开启)" },
+                { "field": "ltBlackTime", "type": "int", "description": "超速惩罚触发自动拉黑临时开关 (0:关闭, 1:开启)" },
+                { "field": "ltRoot", "type": "int", "description": "站点根目录(/)专属访问限速开关 (0:关闭, 1:开启)" },
+                { "field": "ltIpAccess", "type": "int", "description": "单访客IP连接/访问服务器整体速率控制开关 (0:关闭, 1:开启)" },
+                { "field": "ltUriAccess", "type": "int", "description": "特定回源代理URI限速机制开关 (0:关闭, 1:开启)" },
+                { "field": "ltIpSecAccess", "type": "int", "description": "单IP每秒绝对QPS频率限制开关 (0:关闭, 1:开启)" },
+                { "field": "ltBandwidth", "type": "int", "description": "单客户端单线程带宽流控限制开关 (0:关闭, 1:开启)" },
+                { "field": "ltUri", "type": "int", "description": "单URI级别独立限速流控开关 (0:关闭, 1:开启)" },
+                { "field": "ltCode", "type": "int", "description": "特定异常HTTP状态码触发频率过快限速开关 (0:关闭, 1:开启)" },
+                { "field": "ltUa", "type": "int", "description": "基于指定User-Agent指纹高频限速开关 (0:关闭, 1:开启)" },
+                { "field": "ltReleaseBlack", "type": "int", "description": "允许被拉黑访客在前端自助人机释放解封IP开关 (0:关闭, 1:开启)" },
+                { "field": "wafRule", "type": "int", "description": "核心WAF语义引擎规则检测总开关 (0:关闭, 1:开启)" },
+                { "field": "wafBlack", "type": "int", "description": "WAF黑名单强阻断校验开关 (0:关闭, 1:开启)" },
+                { "field": "wafWhite", "type": "int", "description": "WAF白名单放行校验开关 (0:关闭, 1:开启)" },
+                { "field": "wafSqlDeny", "type": "int", "description": "SQL注入攻击专用防护引擎开关 (0:关闭, 1:开启)" },
+                { "field": "wafXssDeny", "type": "int", "description": "XSS跨站脚本攻击专用防护引擎开关 (0:关闭, 1:开启)" },
+                { "field": "wafModSec", "type": "int", "description": "ModSecurity兼容规则集检测引擎开关 (0:关闭, 1:开启)" },
+                { "field": "wafXff", "type": "int", "description": "XFF(X-Forwarded-For)多层代理真实IP透传检测开关 (0:关闭, 1:开启)" },
+                { "field": "wafAuth", "type": "int", "description": "WAF层访问双因子/特定API鉴权认证开关 (0:关闭, 1:开启)" },
+                { "field": "speedTest", "type": "int", "description": "站点测速优化与监控模块开关 (0:关闭, 1:开启)" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_view",
+                "risk_level": "low",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            },
+            {
+              "id": "3.8.0.2",
+              "name": "查询相关功能配置",
+              "path": "/api/site-waf/view",
+              "method": "GET",
+              "curl_example": "curl \"{{POLESTAR_API_URL}}/api/site-waf/view?id=1\" -H \"content-type: application/json\" -H \"polestar-token: {{POLESTAR_TOKEN}}\"",
+              "request_params": [
+                { "field": "id", "type": "int", "required": true, "description": "站点ID" }
+              ],
+              "response_body_data_fields": [
+                { "field": "id", "type": "int", "description": "站点ID" },
+                { "field": "groupWhiteId", "type": "int", "description": "绑定的全局IP白名单分组ID，null代表未绑定" },
+                { "field": "groupBlackId", "type": "int", "description": "绑定的全局IP黑名单分组ID，null代表未绑定" },
+                { "field": "groupLimitId", "type": "int", "description": "绑定的全局限速策略规则分组ID，null代表未绑定" },
+                { "field": "blackUa", "type": "string", "description": "黑名单UA规则字符串配置，null代表未配置" },
+                { "field": "blackArea", "type": "string", "description": "黑名单地域国家配置详情，null代表未配置" },
+                { "field": "blackAsnum", "type": "string", "description": "黑名单AS网络自治系统号原生配置字串" },
+                { "field": "blackAsnumList", "type": "array", "description": "黑名单AS号解析出的规则对象数组" },
+                { "field": "blackIpPage", "type": "int", "description": "自定义IP黑名单拦截页面ID，0为系统默认" },
+                { "field": "blackAreaPage", "type": "int", "description": "自定义地域阻断拦截页面ID，0为系统默认" },
+                { "field": "whiteUa", "type": "string", "description": "白名单UA配置详情" },
+                { "field": "whiteArea", "type": "string", "description": "白名单放行地域国家配置详情" },
+                { "field": "whiteUri", "type": "string", "description": "白名单URI配置详情" },
+                { "field": "whiteDenyIp", "type": "int", "description": "IP匹配白名单后是否跳过后续拦截规则校验 (0:全面校验, 1:直接放行跳过)" },
+                { "field": "whiteDenyIpv6", "type": "int", "description": "IPv6匹配白名单后是否跳过后续拦截规则校验 (0:全面校验, 1:直接放行跳过)" },
+                { "field": "whiteDenyUa", "type": "int", "description": "UA匹配白名单后是否跳过后续拦截规则校验 (0:全面校验, 1:直接放行跳过)" },
+                { "field": "whiteDenyUri", "type": "int", "description": "URI匹配白名单后是否跳过后续拦截规则校验 (0:全面校验, 1:直接放行跳过)" },
+                { "field": "whiteDenyCountry", "type": "int", "description": "国家地域匹配白名单后是否跳过后续拦截规则校验 (0:全面校验, 1:直接放行跳过)" },
+                { "field": "ccType", "type": "string", "description": "CC攻击防护防御模式。manual:手动配置生效阈值, auto:AI智能自动动态计算拦截阈值" },
+                { "field": "ccAutoThreshold", "type": "int", "description": "CC智能防护模式下的自动拦截触发QPS阈值" },
+                { "field": "ccJsChallengeId", "type": "int", "description": "绑定的CC JS质询拦截模版ID" },
+                { "field": "ccCookie302Id", "type": "int", "description": "绑定的CC Cookie 302重定向质询模版ID" },
+                { "field": "ccFiveSecId", "type": "int", "description": "绑定的CC 5秒盾拦截模版ID" },
+                { "field": "ccThreeSecId", "type": "int", "description": "绑定的CC 3秒盾拦截模版ID" },
+                { "field": "ccRecaptchaId", "type": "int", "description": "绑定的CC reCAPTCHA强质询交互模版ID" },
+                { "field": "ccSlideId", "type": "int", "description": "绑定的CC滑动条拖拽验证模版ID" },
+                { "field": "xssDenyId", "type": "int", "description": "绑定的XSS跨站脚本攻击规则集模版ID" },
+                { "field": "sqlDenyId", "type": "int", "description": "绑定的SQL注入深度防御规则集模版ID" },
+                { "field": "authId", "type": "int", "description": "绑定的API网关鉴权规则模版ID，0表示不启用" },
+                { "field": "authKey", "type": "string", "description": "API网关安全校验签名密钥密文串" },
+                { "field": "authField", "type": "string", "description": "网关鉴权校验时从HTTP Header或参数中提取的标识字段名" },
+                { "field": "ltType", "type": "string", "description": "速率限制流控规则生效模式。manual:手动精确设定速率, auto:自适应动态限流" },
+                { "field": "ltAutoThreshold", "type": "int", "description": "速率自适应模式下的动态QPS起算基准阈值" },
+                { "field": "ltBlackTime", "type": "int", "description": "触发高频限速后，违规客户端IP被临时强制拉黑封禁的时间长度（单位：秒）" },
+                { "field": "ltCategory", "type": "string", "description": "限速策略的作用域维度。site:以全局站点为维度统计, domain:以精确的单个独立子域名为维度统计" },
+                { "field": "ltRootRate", "type": "string", "description": "根目录单独限速规则表达式。格式为 'a/b'，a:最大允许访问次数，b:统计监测的时间窗口（秒）" },
+                { "field": "ltIpRate", "type": "string", "description": "单访客IP连接服务器限速频率配置规则字符串。例如 '300/15' 代表 15秒内最大允许访问 300次" },
+                { "field": "ltUriRate", "type": "string", "description": "全局URI通用限速配置规则表达式。格式 'a/b'（次数/秒数）" },
+                { "field": "ltUaRate", "type": "string", "description": "特定User-Agent限速配置规则表达式。格式 'a/b'（次数/秒数）" },
+                { "field": "ltIpRateId", "type": "int", "description": "绑定的单訪客IP通用限速基础算法模版ID" },
+                { "field": "ltIpSecRate", "type": "int", "description": "绝对每秒访问速率控制上限值（1秒内最大允许访问的链接总数）" },
+                { "field": "ltIpSecRateId", "type": "int", "description": "绑定的每秒极限制速流控底层模版ID" },
+                { "field": "blackReleaseMethod", "type": "int", "description": "黑名单临时自动封禁后，访客页面自助解除解封的交互方式。0: 图形人机拼图验证, 1: 直观的滑动条解锁验证" },
+                { "field": "modSecMode", "type": "int", "description": "ModSecurity原生检测匹配模式 (0:仅告警日志观察, 1:严格直接拦截拦截违规请求)" }
+              ],
+              "metadata": {
+                "category": "waf_security",
+                "sub_category": "waf_view",
+                "risk_level": "low",
+                "required_env": ["POLESTAR_TOKEN"]
+              }
+            }
+          ]
+        }
     }
   }
 }

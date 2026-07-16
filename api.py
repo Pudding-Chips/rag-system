@@ -1,18 +1,41 @@
 """
-token校验、统一API
+token校验、统一API 与 安全运维执行审计系统
 """
 from http.server import BaseHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
 import json
 import traceback
 import chromadb
 import os
+import subprocess
+import logging
 from typing import Dict
 from retriever import retrieve
 from reranker import rerank
 from fill import fill_database
 from db import get_collection
+from dotenv import load_dotenv
 from config import DEFAULT_MODEL, COLLECTION_TEMPLATE, DEFAULT_BIZ, RERANK_THRESHOLD
 
+try:
+    load_dotenv()
+except ImportError:
+    print("[WARNING] python-dotenv is not installed. Please run: pip install python-dotenv")
+
+# ==========================================================
+# 🛡️ 1. 统一初始化安全审计日志系统 (Audit Log)
+# ==========================================================
+LOG_FILE_PATH = "secure_ops.log"
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler(LOG_FILE_PATH, encoding='utf-8'),
+        logging.StreamHandler() # 同时也输出到控制台方便开发调试观察
+    ]
+)
+
+# 注入防御黑名单：严格禁止大模型生成的 Shell 命令中夹带任何可跳出沙箱的危险字符
+COMMAND_BLACKLIST = [";", "&&", "||", "|", "`", "$(", "rm", "sh", "bash"]
 
 class RAGHandler(BaseHTTPRequestHandler):
 
@@ -58,7 +81,7 @@ class RAGHandler(BaseHTTPRequestHandler):
             
             try:
                 with open(tokens_file_path, "r", encoding="utf-8") as f:
-                    tenant_tokens =json.load(f)
+                    tenant_tokens = json.load(f)
             except Exception as e:
                 print(f"error: Fail to read file: {e}")
                 return False
@@ -69,8 +92,11 @@ class RAGHandler(BaseHTTPRequestHandler):
 
             return False
 
+        # ==========================================================
+        # 🗑️ 路由 1: /rag/delete (清空/重置本地向量数据库)
+        # ==========================================================
         if self.path == "/rag/delete":
-            try:             
+            try:              
                 data = self._read_json()
                 if not data:
                     self._send({"error": "Invalid JSON"}, 400)
@@ -92,15 +118,13 @@ class RAGHandler(BaseHTTPRequestHandler):
                 target_coll = get_collection(biz)
 
                 if target_coll:
-
                     existing_data = target_coll.get(where={"chat_id": {"$eq": cid}}, limit=1)
                     
                     if not existing_data or not existing_data.get("ids"):
-                        # 💡 2. 如果根本没有找到任何 ID，说明第一次已经删空了，或者原本就是空的
                         self._send({
                             "message": f"Workspace: {cid} in biz: {biz} is already empty. No data to delete.",
                             "deleted": False
-                        }, 200) # 返回 200，但明确告知没有变动
+                        }, 200)
                         return
 
                     target_coll.delete(where={"chat_id": {"$eq": cid}})
@@ -118,6 +142,9 @@ class RAGHandler(BaseHTTPRequestHandler):
                 self._send({"error": str(e)}, 500)
                 return
 
+        # ==========================================================
+        # 🔄 路由 2: /rag/update (增量更新/灌入 API 接口知识库)
+        # ==========================================================
         if self.path == "/rag/update":
             try:
                 data = self._read_json()
@@ -149,15 +176,11 @@ class RAGHandler(BaseHTTPRequestHandler):
                 agent_id = str(data.get("agent_id", "unknown"))
                 group_id = str(data.get("group_id", ""))
 
-                # ==========================================================
-                # 🔍 【关键修复 1】连接数据库并检查数据是否已经存在
-                # ==========================================================
                 target_coll = get_collection(biz)
                 if not target_coll:
                     self._send({"error": "Database connection failed"}, 500)
                     return
 
-                # 这里的字段名必须和 fill_database 写入向量数据库时的 metadata 字段完全一致！
                 where_filter = {
                     "$and": [
                         {"chat_id": {"$eq": cid}},
@@ -168,9 +191,6 @@ class RAGHandler(BaseHTTPRequestHandler):
 
                 existing_data = target_coll.get(where=where_filter, limit=1)
 
-                # ==========================================================
-                # 🚦 【关键修复 2】如果数据已存在，直接拦截并返回 updated: False
-                # ==========================================================
                 if existing_data and existing_data.get("ids"):
                     print(f"[INFO] Workspace {cid} (Agent: {agent_id}, Group: {group_id}) is already up-to-date. Skip.")
                     self._send({
@@ -179,9 +199,6 @@ class RAGHandler(BaseHTTPRequestHandler):
                     })
                     return
 
-                # ==========================================================
-                # 🚀 【数据不存在】第一次才会真正触发 fill_database 写入
-                # ==========================================================
                 print(f"[INFO] First-time sync triggered for workspace: {cid}...")
                 result = fill_database(
                     chat_id=cid, 
@@ -194,15 +211,18 @@ class RAGHandler(BaseHTTPRequestHandler):
                 self._send({
                     "message": "Update successful", 
                     "detail": result,
-                    "updated": True  # 👈 明确告知客户端这是新插入/更新的数据
+                    "updated": True  
                 })
                 return
 
             except Exception as e:
                 traceback.print_exc()
                 self._send({"error": str(e)}, 500)
-            return
+                return
 
+        # ==========================================================
+        # 🔍 路由 3: /rag/query (大模型检索极星云 API 说明书)
+        # ==========================================================
         if self.path == "/rag/query":
             try:
                 data = self._read_json()
@@ -295,7 +315,105 @@ class RAGHandler(BaseHTTPRequestHandler):
                 self._send({"error": str(e)}, 500)
                 return
 
+        # ==========================================================
+        # 🚀 🚀 🚀 【核心新增路由 4】: /rag/execute 🚀 🚀 🚀
+        # 负责接收大模型输出的安全拼装指令，安全拦截、写入审计日志并物理执行。
+        # ==========================================================
+        if self.path == "/rag/execute":
+            try:
+                data = self._read_json()
+                if not data:
+                    self._send({"error": "Invalid JSON"}, 400)
+                    return
+
+                chat_id = data.get("chat_id")
+                if not chat_id:
+                    self._send({"error": "chat_id cannot be empty"}, 400)
+                    return
+                cid = str(chat_id).strip()
+
+                # 安全校验白名单/凭证校验
+                if not check_auth(data, cid):
+                    self._send({"error": "Unauthorized"}, 401)
+                    return
+
+                # 提取大模型在 SKILL.md 拼装好的待执行 raw_command
+                command_to_run = data.get("raw_command", "").strip()
+                if not command_to_run:
+                    self._send({"error": "raw_command cannot be empty"}, 400)
+                    return
+
+                # --- 🛑 注入安全检测层 ---
+                is_dangerous = False
+                detected_char = ""
+                for evil_char in COMMAND_BLACKLIST:
+                    # 允许合法的环境变量取值如 $POLESTAR_TOKEN
+                    if evil_char in command_to_run and "$POLESTAR" not in command_to_run:
+                        is_dangerous = True
+                        detected_char = evil_char
+                        break
+
+                if is_dangerous:
+                    logging.error(f"[SECURITY BLOCK] ID: {cid} | 试图执行包含敏感黑名单字符 '{detected_char}' 的命令: {command_to_run}")
+                    self._send({
+                        "code": 403,
+                        "msg": "Security validation failed. Execution blocked."
+                    }, 403)
+                    return
+
+                # --- 🔒 敏感词审计过滤机制 ---
+                real_token = os.getenv("POLESTAR_TOKEN", "MISSING")
+                # 防范模型未按 SKILL.md 的变量机制拼接，误泄露了真实的本地明文令牌
+                if real_token != "MISSING" and real_token in command_to_run:
+                    logging.warning(f"[SECURITY ALERT] ID: {cid} | 模型拼装命令中包含真实明文 TOKEN。已自动进行净化。")
+                    command_to_run = command_to_run.replace(real_token, "$POLESTAR_TOKEN")
+
+                # --- 📝 写入审计日志记录 ---
+                logging.info(f"[USER OPS REQUEST] ID: {cid} | 请求执行指令: {command_to_run}")
+
+                # --- ⚙️ 安全沙盒物理执行层 ---
+                # env=os.environ 保证子进程在执行 curl 时能自动读取当前系统的真实环境变量（POLESTAR_TOKEN 和 POLESTAR_API_URL）
+                process = subprocess.run(
+                    command_to_run,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                    env=os.environ
+                )
+
+                if process.returncode == 0:
+                    logging.info(f"[EXECUTION SUCCESS] ID: {cid} | 命令执行成功。")
+                    try:
+                        # 尝试将结果转成 JSON 
+                        exec_data = json.loads(process.stdout)
+                    except Exception:
+                        exec_data = process.stdout
+
+                    self._send({
+                        "code": 200,
+                        "msg": "success",
+                        "data": exec_data
+                    })
+                    return
+                else:
+                    logging.error(f"[EXECUTION FAILED] ID: {cid} | 标准错误返回: {process.stderr}")
+                    self._send({
+                        "code": 500,
+                        "msg": "execution_failed",
+                        "detail": process.stderr
+                    }, 500)
+                    return
+
+            except Exception as e:
+                traceback.print_exc()
+                logging.error(f"[EXECUTION EXCEPTION] ID: {cid if 'cid' in locals() else 'unknown'} | 异常详情: {str(e)}")
+                self._send({"error": str(e)}, 500)
+                return
+
+        # 兜底
         self._send({"error": "Not found"}, 404)
+
 
 def run():
     target_collection_name = COLLECTION_TEMPLATE.format(biz=DEFAULT_BIZ)
@@ -308,6 +426,7 @@ def run():
     print("API Server is running on port 8001: http://localhost:8001")
     print(f"Target Collection: {target_collection_name}")
     server.serve_forever()
+
 
 if __name__ == "__main__":
     run()
